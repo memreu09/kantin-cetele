@@ -1,5 +1,5 @@
 {
-  "version": "2026.11.20.1",
+  "version": "2026.11.20.2",
   "updatedAt": "2026-11-20",
   "currency": "₺",
   "categories": [
@@ -38,6 +38,12 @@
       "name": "Atıştırmalık",
       "icon": "cookie",
       "color": "violet"
+    },
+    {
+      "id": "cat_1ppr1kv9ow",
+      "name": "Diğer",
+      "icon": "box",
+      "color": "slate"
     }
   ],
   "products": [
@@ -382,6 +388,534 @@
       "name": "Tylolhot",
       "price": 45,
       "categoryId": "sicak"
+    },
+    {
+      "id": "p_0tybcvvwrv",
+      "name": "Tuvalet Kağıdı",
+      "price": 10,
+      "categoryId": "cat_1ppr1kv9ow"
+    },
+    {
+      "id": "p_w71qy3w68k",
+      "name": "Selpak",
+      "price": 10,
+      "categoryId": "cat_1ppr1kv9ow"
+    },
+    {
+      "id": "p_qnum1mwj15",
+      "name": "Islak Mendil",
+      "price": 10,
+      "categoryId": "cat_1ppr1kv9ow"
+    },
+    {
+      "id": "p_p4d5w0yoil",
+      "name": "Su 0.5L",
+      "price": 10,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_whkg5dywvq",
+      "name": "Su 1.5L",
+      "price": 20,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_hwkbhjzo3f",
+      "name": "Didi 1,5L",
+      "price": 70,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_si5lhn00z3",
+      "name": "Didi 0,5",
+      "price": 40,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_ptp9xh0fyo",
+      "name": "Doğuş Soğuk Çay 0.25L",
+      "price": 25,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_u6x1p30qu7",
+      "name": "Link",
+      "price": 20,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_wr6rnq0y4g",
+      "name": "Şalgam",
+      "price": 25,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_jtifg41gq1",
+      "name": "Ayran (Büyük)",
+      "price": 25,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_oc31jt1spz",
+      "name": "Meyve Suyu",
+      "price": 20,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_otjmxt21b1",
+      "name": "Süt",
+      "price": 16,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_vbaie13zau",
+      "name": "Dimes Meyve Suyu",
+      "price": 40,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_u79uvi4axd",
+      "name": "Cola Turka 0.33L",
+      "price": 45,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_x4z4f25q09",
+      "name": "Cola Turka Cam 0.2L",
+      "price": 35,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_7203dk62vj",
+      "name": "Meyveli Soda",
+      "price": 20,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_7rmyuj6kkn",
+      "name": "Beypazarı",
+      "price": 18,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_gomqhg7cqu",
+      "name": "Deep Enerji 0.25L",
+      "price": 59,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_psoy3t7mda",
+      "name": "Deep Enerji 0.5L",
+      "price": 70,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_4ohllm7zex",
+      "name": "Niğde Gazozu",
+      "price": 30,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_da06y587rg",
+      "name": "Aroma",
+      "price": 30,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_otwoeqa2bn",
+      "name": "Uludağ Gazoz Küçük",
+      "price": 30,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_rnl1b4aj2a",
+      "name": "Uludağ Gazoz Büyük",
+      "price": 75,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_q0e5c6asg4",
+      "name": "Cola Turka 1.5L",
+      "price": 60,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_r74updb2un",
+      "name": "Cola Turka 2.5L",
+      "price": 85,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_gkll44kybi",
+      "name": "Obsesso Soğuk Kahve",
+      "price": 70,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_bz9241lexz",
+      "name": "Uludağ Limonata 1L",
+      "price": 65,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_3dwxrjlvoc",
+      "name": "Uludağ Meyvelim 1L",
+      "price": 70,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_6wiwn3mybi",
+      "name": "Doğuş Soğuk Çay 1L",
+      "price": 50,
+      "categoryId": "soguk"
+    },
+    {
+      "id": "p_e1b0yanyjc",
+      "name": "Sakız",
+      "price": 60,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_5fwz8wo8tk",
+      "name": "Haribo",
+      "price": 45,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_1rn50kof9c",
+      "name": "Harby",
+      "price": 15,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_idmszuokwp",
+      "name": "Noodle",
+      "price": 45,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_ncznspotr6",
+      "name": "Cici Bebe",
+      "price": 60,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_h2xhusp39g",
+      "name": "Biscolata Stix",
+      "price": 28,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_boef9npc6z",
+      "name": "Magma Kek",
+      "price": 25,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_97bzu2plsz",
+      "name": "Kekstra Jöleli",
+      "price": 14,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_nedl1vpwe0",
+      "name": "Kekstra Konfeti",
+      "price": 18,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_hg5b1sq9tf",
+      "name": "Gong Küçük",
+      "price": 20,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_6c5kbqqgvn",
+      "name": "Gong Büyük",
+      "price": 36,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_yzmyyzqpg4",
+      "name": "Fox Cips",
+      "price": 20,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_o8ozi9qwpx",
+      "name": "Cips",
+      "price": 70,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_bfbmdmrit6",
+      "name": "Meyveli Yoğurt",
+      "price": 85,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_xtqstjs6hz",
+      "name": "Nero",
+      "price": 30,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_b983vlsfcu",
+      "name": "Eti Cin",
+      "price": 30,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_g9czz7ss0y",
+      "name": "Eti Benimo",
+      "price": 35,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_ebx3acsxi3",
+      "name": "Eti Burçak",
+      "price": 25,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_9m386at3uq",
+      "name": "Bidolu",
+      "price": 20,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_mmqkkqt995",
+      "name": "Hoşbeş",
+      "price": 20,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_o1bnxstw8p",
+      "name": "Eti Kombo",
+      "price": 35,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_adqyqgu8fe",
+      "name": "Burçak Sütlü Çikolatalı",
+      "price": 40,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_fvk56gui3n",
+      "name": "Eti Susamlı Kraker",
+      "price": 30,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_y64a0qup88",
+      "name": "Eti Crax",
+      "price": 20,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_tyn2ynvak1",
+      "name": "Eti Crax Patlayan Lezzet",
+      "price": 25,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_h2ny75vpf8",
+      "name": "Burçak Kremalı",
+      "price": 30,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_au978vvzfb",
+      "name": "Eti Tutku",
+      "price": 30,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_7szlnyw9zp",
+      "name": "Albeni Bisküvi",
+      "price": 40,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_wqatkywiiy",
+      "name": "Ülker Dore",
+      "price": 35,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_vxhhyawrv1",
+      "name": "Ülker İkram",
+      "price": 30,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_mr3ya9x0gd",
+      "name": "Ülker Saklıköy",
+      "price": 30,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_ew25wtyc8j",
+      "name": "Crax Sade Büyük",
+      "price": 20,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_mi1hm4yrxe",
+      "name": "Crax Sade Küçük",
+      "price": 10,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_rvwiixz0pf",
+      "name": "Ülker Probis",
+      "price": 30,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_dnvvc9z8om",
+      "name": "Ülker Hanımeller",
+      "price": 27,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_2cyi9lzgxl",
+      "name": "Biskrem",
+      "price": 30,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_qz4atlzq8v",
+      "name": "Ülker Çizi Viç",
+      "price": 30,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_a97u0izy50",
+      "name": "Ülker Çizi",
+      "price": 22,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_fa1u3m0fud",
+      "name": "Ülker Haylayf",
+      "price": 20,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_t226p70u19",
+      "name": "Ülker Canpare",
+      "price": 30,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_0avw9613sx",
+      "name": "Popkek",
+      "price": 18,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_zgscpo1f09",
+      "name": "Eti Browni Kek",
+      "price": 18,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_btiafl1ng1",
+      "name": "Topkek",
+      "price": 13,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_9jyh8a22d0",
+      "name": "Eti Browni",
+      "price": 25,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_5m7gvl2ced",
+      "name": "Ülker Çikolatalı Gofret",
+      "price": 19,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_85kfpv2sc1",
+      "name": "Eti Çikolatalı Gofret",
+      "price": 18,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_haywas2ysq",
+      "name": "Eti Karam",
+      "price": 30,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_8hc30r389f",
+      "name": "Eti Ahenk",
+      "price": 30,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_beu0y33gzi",
+      "name": "Albeni Çikolata",
+      "price": 25,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_ukm5923ph5",
+      "name": "Eti Canga",
+      "price": 25,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_ordtf141hh",
+      "name": "Cocostar",
+      "price": 16,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_2z1q35480i",
+      "name": "Ülker Laviva",
+      "price": 30,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_lpb1544h0h",
+      "name": "Ülker Metro",
+      "price": 25,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_gfswab4tbh",
+      "name": "Ülker Dido",
+      "price": 30,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_fk0dg050f2",
+      "name": "Ülker Çokonat",
+      "price": 28,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_t2fi0q57e2",
+      "name": "Eti Maximus",
+      "price": 24,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_6rzqoy5gms",
+      "name": "Ülker Caramio",
+      "price": 28,
+      "categoryId": "atistirmalik"
+    },
+    {
+      "id": "p_9hgzrv5r7f",
+      "name": "Ülker Piko",
+      "price": 13,
+      "categoryId": "atistirmalik"
     }
   ]
 }
