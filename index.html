@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Kantin" />
+  <title>Kantin Çetele</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+  <script defer src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --surface-2: #f8fafc;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --header: #0f172a;
+      --emerald: #10b981;
+      --emerald-dk: #059669;
+      --amber: #f59e0b;
+      --rose: #ef4444;
+      --sky: #0ea5e9;
+      --violet: #8b5cf6;
+      --orange: #f97316;
+      --radius: 14px;
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%; height: 100dvh;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input, select, textarea { font: inherit; color: inherit; }
+    button { border: 0; background: none; cursor: pointer; padding: 0; }
+
+    /* App Shell */
+    .app {
+      display: flex; flex-direction: column;
+      width: 100%; height: 100dvh;
+      max-width: 560px; margin: 0 auto;
+      background: var(--bg);
+      box-shadow: 0 0 40px rgba(15,23,42,.08);
+      position: relative;
+    }
+
+    /* Top Header */
+    .topbar {
+      background: var(--header);
+      color: #f8fafc;
+      padding: calc(10px + var(--sat)) 14px 10px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      flex-shrink: 0;
+    }
+    .brand { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .brand-dot {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--emerald), #0d9488);
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .brand-title { font-weight: 700; font-size: 15px; letter-spacing: -.01em; line-height: 1.1; }
+    .pay-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,.09);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11.5px; color: #e2e8f0;
+      white-space: nowrap;
+    }
+    .pay-pill.today {
+      background: rgba(245,158,11,.22);
+      border-color: rgba(245,158,11,.55);
+      color: #fde68a; font-weight: 600;
+    }
+    .pay-bar {
+      width: 34px; height: 4px; border-radius: 4px;
+      background: rgba(255,255,255,.18); overflow: hidden;
+    }
+    .pay-bar > i { display: block; height: 100%; background: var(--emerald); border-radius: 4px; }
+    .pay-pill.today .pay-bar > i { background: var(--amber); }
+
+    .shield-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(16,185,129,.16);
+      border: 1px solid rgba(16,185,129,.35);
+      color: #a7f3d0;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 11.5px; font-weight: 600;
+      flex-shrink: 0;
+    }
+    .shield-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--emerald); }
+
+    /* Horizontal Main Viewport */
+    .viewport {
+      flex: 1; min-height: 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .track {
+      display: flex;
+      width: 100%; height: 100%;
+      transition: transform .26s cubic-bezier(.22,1,.36,1);
+      will-change: transform;
+    }
+    .track.dragging { transition: none; }
+    .panel {
+      flex: 0 0 100%;
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      min-height: 0;
+      padding: 10px 12px 8px;
+      gap: 8px;
+    }
+
+    /* Search & Inputs */
+    .search-row { display: flex; gap: 7px; position: relative; flex-shrink: 0; z-index: 20; }
+    .search-box {
+      flex: 1; position: relative; display: flex; align-items: center;
+      background: var(--surface); border: 1.5px solid var(--line);
+      border-radius: 12px; padding: 0 10px; height: 44px;
+      transition: border-color .15s;
+    }
+    .search-box:focus-within { border-color: var(--emerald); }
+    .search-box input {
+      flex: 1; border: 0; outline: 0; background: transparent;
+      font-size: 14.5px; padding: 0 6px; min-width: 0;
+    }
+    .icon-btn {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: var(--surface); border: 1.5px solid var(--line);
+      display: grid; place-items: center; color: var(--ink); flex-shrink: 0;
+    }
+    .icon-btn:active { transform: scale(.96); }
+    .clear-x { color: var(--muted); padding: 4px; display: none; }
+    .clear-x.show { display: grid; place-items: center; }
+
+    /* Suggestions Dropdown */
+    .suggest-box {
+      position: absolute; left: 0; right: 0; top: 48px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 14px 32px rgba(15,23,42,.14);
+      max-height: 270px; overflow-y: auto;
+      display: none; z-index: 40;
+    }
+    .suggest-box.open { display: block; }
+    .suggest-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; width: 100%; text-align: left;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .suggest-item:last-child { border-bottom: 0; }
+    .suggest-item.active, .suggest-item:active { background: #ecfdf5; }
+    .suggest-name { flex: 1; font-weight: 600; font-size: 13.5px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .suggest-sub { font-size: 11px; color: var(--muted); font-weight: 400; display: block; }
+    .suggest-price { font-weight: 700; color: var(--emerald-dk); white-space: nowrap; }
+    .qty-badge {
+      background: #0f172a; color: #fff; font-size: 11px; font-weight: 700;
+      padding: 2px 6px; border-radius: 6px; margin-right: 4px;
+    }
+
+    /* Segmented Controls & Mini Bars */
+    .row-between { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }
+    .seg {
+      display: inline-flex; background: #e2e8f0; border-radius: 10px; padding: 3px; gap: 2px;
+    }
+    .seg button {
+      padding: 5px 11px; border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--muted);
+    }
+    .seg button.active { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .pill-muted {
+      font-size: 11.5px; font-weight: 600; color: var(--muted);
+      background: var(--surface); border: 1px solid var(--line);
+      padding: 4px 9px; border-radius: 999px;
+    }
+
+    /* Scrollable Content List */
+    .scroll-list {
+      flex: 1; min-height: 0;
+      overflow-y: auto; -webkit-overflow-scrolling: touch;
+      display: flex; flex-direction: column; gap: 6px;
+      padding-right: 2px;
+    }
+    .scroll-list::-webkit-scrollbar { width: 4px; }
+    .scroll-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+    .item-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 9px 10px;
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0;
+    }
+    .cat-ico {
+      width: 34px; height: 34px; border-radius: 10px;
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .c-amber { background: #fef3c7; color: #b45309; }
+    .c-orange { background: #ffedd5; color: #c2410c; }
+    .c-rose { background: #ffe4e6; color: #be123c; }
+    .c-emerald { background: #d1fae5; color: #047857; }
+    .c-sky { background: #e0f2fe; color: #0369a1; }
+    .c-violet { background: #ede9fe; color: #6d28d9; }
+    .c-slate { background: #e2e8f0; color: #334155; }
+    .c-teal { background: #ccfbf1; color: #0f766e; }
+
+    .item-info { flex: 1; min-width: 0; }
+    .item-title { font-weight: 600; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .item-meta { font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; margin-top: 1px; }
+    .item-total { font-weight: 700; font-size: 14px; min-width: 54px; text-align: right; }
+
+    .stepper {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: var(--surface-2); border: 1px solid var(--line); border-radius: 9px; padding: 2px;
+    }
+    .stepper button {
+      width: 26px; height: 26px; border-radius: 7px; font-weight: 700; font-size: 15px;
+      display: grid; place-items: center; color: var(--ink);
+    }
+    .stepper button:active { background: #e2e8f0; }
+    .stepper span { min-width: 20px; text-align: center; font-weight: 700; font-size: 13px; }
+    .del-btn {
+      width: 28px; height: 28px; border-radius: 8px; color: var(--muted);
+      display: grid; place-items: center;
+    }
+    .del-btn:active { background: #fee2e2; color: var(--rose); }
+
+    /* Empty State */
+    .empty {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: var(--muted); text-align: center; gap: 8px; padding: 20px;
+    }
+    .empty svg { opacity: .45; }
+
+    /* Weekly Total Bar */
+    .total-bar {
+      background: var(--header); color: #fff;
+      border-radius: 14px; padding: 11px 13px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      flex-shrink: 0;
+    }
+    .total-lbl { font-size: 11px; color: #94a3b8; font-weight: 500; }
+    .total-val { font-size: 21px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+    .total-actions { display: flex; align-items: center; gap: 7px; }
+    .wa-btn {
+      width: 40px; height: 40px; border-radius: 11px;
+      background: rgba(255,255,255,.12); color: #a7f3d0;
+      display: grid; place-items: center;
+    }
+    .pay-btn {
+      background: var(--emerald); color: #fff;
+      font-weight: 700; font-size: 13px;
+      padding: 0 14px; height: 40px; border-radius: 11px;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .pay-btn:disabled { opacity: .4; cursor: default; }
+
+    /* Analytics Panel */
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; flex-shrink: 0; }
+    .kpi {
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: 12px; padding: 9px 10px;
+    }
+    .kpi-l { font-size: 11px; color: var(--muted); font-weight: 500; }
+    .kpi-v { font-size: 16px; font-weight: 800; margin-top: 2px; letter-spacing: -.02em; }
+
+    .carousel-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 7px; position: relative; }
+    .carousel {
+      flex: 1; min-height: 0;
+      display: flex; gap: 10px;
+      overflow-x: auto; scroll-snap-type: x mandatory;
+      scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    }
+    .carousel::-webkit-scrollbar { display: none; }
+    .c-card {
+      flex: 0 0 100%; width: 100%; height: 100%;
+      scroll-snap-align: start; scroll-snap-stop: always;
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: 14px; padding: 12px;
+      display: flex; flex-direction: column; gap: 9px; min-height: 0;
+    }
+    .c-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }
+    .c-title { font-weight: 700; font-size: 14px; }
+    .c-body { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+    .dots-row {
+      display: flex; align-items: center; justify-content: center; gap: 10px; flex-shrink: 0;
+    }
+    .dot-btn { width: 8px; height: 8px; border-radius: 99px; background: #cbd5e1; transition: all .2s; }
+    .dot-btn.active { width: 22px; background: var(--ink); }
+    .arrow-mini {
+      width: 26px; height: 26px; border-radius: 8px;
+      background: var(--surface); border: 1px solid var(--line);
+      display: grid; place-items: center; color: var(--ink);
+    }
+
+    .bar-row { display: flex; flex-direction: column; gap: 4px; }
+    .bar-top { display: flex; align-items: center; gap: 7px; font-size: 13px; }
+    .bar-name { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-val { font-weight: 700; font-size: 12.5px; color: var(--ink); white-space: nowrap; }
+    .bar-track { height: 6px; background: #f1f5f9; border-radius: 99px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 99px; background: var(--emerald); }
+
+    .week-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 9px 10px; border-radius: 11px;
+      background: var(--surface-2); border: 1px solid var(--line);
+      width: 100%; text-align: left;
+    }
+    .week-row:active { background: #e2e8f0; }
+
+    /* Menu Panel */
+    .chips {
+      display: flex; gap: 6px; overflow-x: auto; flex-shrink: 0;
+      scrollbar-width: none; padding-bottom: 2px;
+    }
+    .chips::-webkit-scrollbar { display: none; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 6px 10px; border-radius: 999px;
+      background: var(--surface); border: 1px solid var(--line);
+      font-size: 12px; font-weight: 600; color: var(--muted);
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .chip.active { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+    .tool-strip {
+      display: flex; gap: 6px; overflow-x: auto; flex-shrink: 0; scrollbar-width: none;
+    }
+    .tool-strip::-webkit-scrollbar { display: none; }
+    .t-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 10px; border-radius: 10px;
+      background: var(--surface); border: 1px solid var(--line);
+      font-size: 12px; font-weight: 600; white-space: nowrap; flex-shrink: 0;
+      position: relative;
+    }
+    .t-btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .t-btn.accent { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+    .dirty-dot {
+      position: absolute; top: -3px; right: -3px;
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--amber); border: 2px solid var(--bg);
+    }
+
+    /* Bottom Navigation */
+    .nav {
+      background: var(--surface);
+      border-top: 1px solid var(--line);
+      padding: 6px 12px calc(6px + var(--sab));
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+      flex-shrink: 0;
+    }
+    .nav button {
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      padding: 6px 4px; border-radius: 11px;
+      font-size: 11px; font-weight: 600; color: var(--muted);
+    }
+    .nav button.active { color: var(--ink); background: #f1f5f9; }
+    .nav button.active svg { color: var(--emerald-dk); }
+
+    /* Modal / Bottom Sheet */
+    .backdrop {
+      position: fixed; inset: 0; background: rgba(15,23,42,.52);
+      display: none; align-items: flex-end; justify-content: center;
+      z-index: 100; padding: 12px;
+    }
+    .backdrop.open { display: flex; }
+    .sheet {
+      width: 100%; max-width: 520px; max-height: 86dvh;
+      background: var(--surface); border-radius: 18px;
+      padding: 16px; display: flex; flex-direction: column; gap: 12px;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0,0,0,.25);
+    }
+    .sheet-head { display: flex; align-items: center; justify-content: space-between; }
+    .sheet-title { font-weight: 800; font-size: 16px; }
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label { font-size: 12px; font-weight: 600; color: var(--muted); }
+    .field input, .field select, .field textarea {
+      border: 1.5px solid var(--line); border-radius: 10px;
+      padding: 9px 11px; outline: 0; background: var(--surface-2);
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--emerald); background: #fff; }
+    .btn-row { display: flex; gap: 8px; }
+    .btn {
+      flex: 1; height: 42px; border-radius: 11px; font-weight: 700; font-size: 13.5px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-primary { background: var(--ink); color: #fff; }
+    .btn-emerald { background: var(--emerald); color: #fff; }
+    .btn-soft { background: #f1f5f9; color: var(--ink); }
+    .btn-danger { background: #fee2e2; color: #b91c1c; }
+
+    .icon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+    .ico-pick {
+      border: 1.5px solid var(--line); border-radius: 11px; padding: 9px 4px;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      font-size: 10.5px; font-weight: 600; color: var(--muted);
+    }
+    .ico-pick.active { border-color: var(--emerald); background: #ecfdf5; color: var(--ink); }
+    .color-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .col-dot {
+      width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent;
+    }
+    .col-dot.active { border-color: var(--ink); transform: scale(1.1); }
+
+    .info-box {
+      background: var(--surface-2); border: 1px solid var(--line);
+      border-radius: 12px; padding: 10px 12px; font-size: 12.5px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .info-line { display: flex; justify-content: space-between; gap: 8px; }
+    .tag-local {
+      font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 99px;
+      background: #e0f2fe; color: #0369a1;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed; left: 50%; bottom: calc(74px + var(--sab));
+      transform: translateX(-50%) translateY(16px);
+      background: #0f172a; color: #fff;
+      padding: 9px 14px; border-radius: 999px;
+      font-size: 12.5px; font-weight: 600;
+      opacity: 0; pointer-events: none; transition: all .22s;
+      z-index: 200; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+      box-shadow: 0 8px 24px rgba(15,23,42,.25);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- TOP HEADER -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-dot">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg>
+      </div>
+      <span class="brand-title">Kantin</span>
+      <div id="payPill" class="pay-pill" title="Pazartesi ödeme günü geri sayımı">
+        <span id="payText">Pzt</span>
+        <span class="pay-bar"><i id="payBar" style="width:50%"></i></span>
+      </div>
+    </div>
+    <button id="shieldBtn" class="shield-btn" type="button">
+      <span id="shieldDot" class="shield-dot"></span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+      <span>Güvende</span>
+    </button>
+  </header>
+
+  <!-- HORIZONTAL SWIPE VIEWPORT -->
+  <main id="viewport" class="viewport">
+    <div id="track" class="track">
+
+      <!-- PANEL 0: ÇETELE -->
+      <section class="panel" aria-label="Haftalık Çetele">
+        <div class="search-row">
+          <div class="search-box">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="searchInput" type="text" autocomplete="off" placeholder="Ürün ekle (örn: 2 cay, kasarli)..." />
+            <button id="clearSearch" class="clear-x" type="button" aria-label="Temizle">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <button id="bulkBtn" class="icon-btn" type="button" title="Toplu Not Yapıştır">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h4"/></svg>
+          </button>
+          <div id="suggestBox" class="suggest-box"></div>
+        </div>
+
+        <div class="row-between">
+          <div class="seg" role="tablist">
+            <button id="modeGrouped" class="active" type="button">Özet</button>
+            <button id="modeLog" type="button">Sıralı</button>
+          </div>
+          <span id="weekCountPill" class="pill-muted">0 ürün</span>
+        </div>
+
+        <div id="weekList" class="scroll-list"></div>
+
+        <div class="total-bar">
+          <div>
+            <div class="total-lbl">Haftalık Toplam</div>
+            <div id="weekTotal" class="total-val">0 ₺</div>
+          </div>
+          <div class="total-actions">
+            <button id="waShareBtn" class="wa-btn" type="button" title="WhatsApp Özeti">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            </button>
+            <button id="closeWeekBtn" class="pay-btn" type="button" disabled>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Öde & Kapat</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANEL 1: ANALİZ -->
+      <section class="panel" aria-label="Analiz">
+        <div class="row-between">
+          <div class="seg" id="periodSeg">
+            <button data-p="90" class="active" type="button">3 Ay</button>
+            <button data-p="30" type="button">1 Ay</button>
+            <button data-p="all" type="button">Tümü</button>
+          </div>
+          <button id="includeActiveBtn" class="pill-muted" type="button">+ Aktif Hafta</button>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi"><div class="kpi-l">Toplam</div><div id="kpiTotal" class="kpi-v">0 ₺</div></div>
+          <div class="kpi"><div class="kpi-l">Haftalık Ort.</div><div id="kpiAvg" class="kpi-v">0 ₺</div></div>
+          <div class="kpi"><div class="kpi-l">Adet</div><div id="kpiQty" class="kpi-v">0</div></div>
+        </div>
+
+        <div class="carousel-wrap" data-no-panel-swipe="1">
+          <div id="analyticsCarousel" class="carousel">
+            <!-- Card 0: Top 6 -->
+            <article class="c-card">
+              <div class="c-head">
+                <span class="c-title">En Çok Alınan 6 Ürün</span>
+                <div class="seg" id="topMetricSeg">
+                  <button data-m="qty" class="active" type="button">Adet</button>
+                  <button data-m="sum" type="button">Tutar</button>
+                </div>
+              </div>
+              <div id="top6Body" class="c-body"></div>
+            </article>
+            <!-- Card 1: Weeks -->
+            <article class="c-card">
+              <div class="c-head">
+                <span class="c-title">Hafta Hafta Ödemeler</span>
+                <span id="weeksCountLbl" class="pill-muted">0 hafta</span>
+              </div>
+              <div id="weeksBody" class="c-body"></div>
+            </article>
+            <!-- Card 2: Categories -->
+            <article class="c-card">
+              <div class="c-head">
+                <span class="c-title">Kategori Dağılımı</span>
+                <span class="pill-muted">Pay %</span>
+              </div>
+              <div id="catsBody" class="c-body"></div>
+            </article>
+          </div>
+          <div class="dots-row">
+            <button id="carPrev" class="arrow-mini" type="button" aria-label="Önceki">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button class="dot-btn active" data-dot="0" type="button"></button>
+            <button class="dot-btn" data-dot="1" type="button"></button>
+            <button class="dot-btn" data-dot="2" type="button"></button>
+            <button id="carNext" class="arrow-mini" type="button" aria-label="Sonraki">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANEL 2: MENÜ & FİYATLAR -->
+      <section class="panel" aria-label="Menü">
+        <div class="tool-strip" data-no-panel-swipe="1">
+          <button id="addProdBtn" class="t-btn primary" type="button">+ Ürün</button>
+          <button id="addCatBtn" class="t-btn" type="button">+ Kategori</button>
+          <button id="exportXlsxBtn" class="t-btn accent" type="button">
+            <span>Excel Güncelle</span>
+            <i id="xlsxDirty" class="dirty-dot" style="display:none"></i>
+          </button>
+          <button id="importXlsxBtn" class="t-btn" type="button">Excel Yükle</button>
+          <button id="exportMenuJsonBtn" class="t-btn" type="button">
+            <span>menu.json</span>
+            <i id="jsonDirty" class="dirty-dot" style="display:none"></i>
+          </button>
+          <button id="syncMenuBtn" class="t-btn" type="button">Fiyat Çek</button>
+        </div>
+
+        <div class="search-box" style="height:40px;flex-shrink:0">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="menuFilterInput" type="text" autocomplete="off" placeholder="Menüde filtrele..." />
+        </div>
+
+        <div id="catChips" class="chips" data-no-panel-swipe="1"></div>
+        <div id="menuList" class="scroll-list"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="nav" aria-label="Ana Menü">
+    <button class="active" data-tab="0" type="button">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+      <span>Çetele</span>
+    </button>
+    <button data-tab="1" type="button">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16v-5M12 16V8M17 16v-3"/></svg>
+      <span>Analiz</span>
+    </button>
+    <button data-tab="2" type="button">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1.5"/><rect width="7" height="7" x="14" y="3" rx="1.5"/><rect width="7" height="7" x="14" y="14" rx="1.5"/><rect width="7" height="7" x="3" y="14" rx="1.5"/></svg>
+      <span>Menü</span>
+    </button>
+  </nav>
+</div>
+
+<!-- HIDDEN FILE INPUTS -->
+<input id="xlsxFileInput" type="file" accept=".xlsx,.xls,.csv" hidden />
+<input id="jsonBackupInput" type="file" accept=".json" hidden />
+
+<!-- MODAL BACKDROP -->
+<div id="backdrop" class="backdrop">
+  <div id="sheet" class="sheet"></div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  const DEFAULT_MENU = {"version": "2026.11.20.1", "updatedAt": "2026-11-20", "currency": "₺", "categories": [{"id": "tava", "name": "Tava Çeşitleri", "icon": "utensils", "color": "amber"}, {"id": "tost", "name": "Tost Çeşitleri", "icon": "toast", "color": "orange"}, {"id": "ekmek", "name": "Ekmek Arası & Diğer", "icon": "burger", "color": "rose"}, {"id": "sicak", "name": "Sıcak İçecekler", "icon": "hot-cup", "color": "emerald"}, {"id": "soguk", "name": "Soğuk İçecekler", "icon": "cold-cup", "color": "sky"}, {"id": "atistirmalik", "name": "Atıştırmalık", "icon": "cookie", "color": "violet"}], "products": [{"id": "tava_01", "name": "Sade Menemen", "price": 95, "categoryId": "tava"}, {"id": "tava_02", "name": "Kaşarlı Menemen", "price": 115, "categoryId": "tava"}, {"id": "tava_03", "name": "Sucuklu Menemen", "price": 115, "categoryId": "tava"}, {"id": "tava_04", "name": "Karışık Menemen", "price": 130, "categoryId": "tava"}, {"id": "tava_05", "name": "Sade Yumurta", "price": 60, "categoryId": "tava"}, {"id": "tava_06", "name": "Kaşarlı Yumurta", "price": 75, "categoryId": "tava"}, {"id": "tava_07", "name": "Sucuklu Yumurta", "price": 75, "categoryId": "tava"}, {"id": "tava_08", "name": "Karışık Yumurta", "price": 90, "categoryId": "tava"}, {"id": "tava_09", "name": "Sebzeli Yumurta", "price": 75, "categoryId": "tava"}, {"id": "tava_10", "name": "Sebzeli Kaşarlı Y.", "price": 90, "categoryId": "tava"}, {"id": "tava_11", "name": "Sebzeli Sucuklu Y.", "price": 90, "categoryId": "tava"}, {"id": "tava_12", "name": "Sebzeli Karışık Y.", "price": 100, "categoryId": "tava"}, {"id": "tava_13", "name": "Kavurmalı Yumurta", "price": 160, "categoryId": "tava"}, {"id": "tost_01", "name": "Sucuklu Tost", "price": 70, "categoryId": "tost"}, {"id": "tost_02", "name": "Kaşarlı Tost", "price": 75, "categoryId": "tost"}, {"id": "tost_03", "name": "Karışık Tost", "price": 85, "categoryId": "tost"}, {"id": "tost_04", "name": "Sebzeli Kaşarlı Tost", "price": 80, "categoryId": "tost"}, {"id": "tost_05", "name": "Sebzeli Sucuklu Tost", "price": 80, "categoryId": "tost"}, {"id": "tost_06", "name": "Sebzeli Karışık Tost", "price": 95, "categoryId": "tost"}, {"id": "tost_07", "name": "Çift Kaşarlı Tost", "price": 100, "categoryId": "tost"}, {"id": "tost_08", "name": "Yumurtalı Kaşarlı Tost", "price": 80, "categoryId": "tost"}, {"id": "tost_09", "name": "Yumurtalı Sucuklu Tost", "price": 80, "categoryId": "tost"}, {"id": "tost_10", "name": "Yumurtalı Karışık Tost", "price": 95, "categoryId": "tost"}, {"id": "tost_11", "name": "Kavurmalı Tost", "price": 135, "categoryId": "tost"}, {"id": "tost_12", "name": "Kavurmalı Kaşarlı Tost", "price": 160, "categoryId": "tost"}, {"id": "ekmek_01", "name": "Ekmek Arası Tavuk", "price": 90, "categoryId": "ekmek"}, {"id": "ekmek_02", "name": "Ekmek Arası Nugget", "price": 90, "categoryId": "ekmek"}, {"id": "ekmek_03", "name": "Ekmek Arası Tantuni", "price": 90, "categoryId": "ekmek"}, {"id": "ekmek_04", "name": "Sucuk Ekmek", "price": 90, "categoryId": "ekmek"}, {"id": "ekmek_05", "name": "Ekmek A. Ton Balığı", "price": 120, "categoryId": "ekmek"}, {"id": "ekmek_06", "name": "Patsolu Tavuk / Nugget / Sucuk", "price": 115, "categoryId": "ekmek"}, {"id": "ekmek_07", "name": "Köfte Ekmek", "price": 160, "categoryId": "ekmek"}, {"id": "ekmek_08", "name": "Tabak Tavuk Patates", "price": 180, "categoryId": "ekmek"}, {"id": "ekmek_09", "name": "Adana Dürüm", "price": 160, "categoryId": "ekmek"}, {"id": "ekmek_10", "name": "Tavuk Dürüm", "price": 110, "categoryId": "ekmek"}, {"id": "ekmek_11", "name": "Patsolu Tavuk Dürüm", "price": 130, "categoryId": "ekmek"}, {"id": "ekmek_12", "name": "Tantuni Dürüm", "price": 110, "categoryId": "ekmek"}, {"id": "ekmek_13", "name": "Soğuk Sandviç", "price": 80, "categoryId": "ekmek"}, {"id": "ekmek_14", "name": "Patso", "price": 70, "categoryId": "ekmek"}, {"id": "ekmek_15", "name": "Patates Tabağı", "price": 70, "categoryId": "ekmek"}, {"id": "ekmek_16", "name": "Çiğ Köfte Dürüm", "price": 60, "categoryId": "ekmek"}, {"id": "ekmek_17", "name": "Pizza", "price": 200, "categoryId": "ekmek"}, {"id": "sicak_01", "name": "Büyük Çay", "price": 15, "categoryId": "sicak"}, {"id": "sicak_02", "name": "Termos Çay (2L)", "price": 150, "categoryId": "sicak"}, {"id": "sicak_03", "name": "Demleme Ihlamur", "price": 15, "categoryId": "sicak"}, {"id": "sicak_04", "name": "Ihlamur", "price": 12, "categoryId": "sicak"}, {"id": "sicak_05", "name": "Ballı Zenc. Ihlamur", "price": 12, "categoryId": "sicak"}, {"id": "sicak_06", "name": "Kırmızı Meyveler", "price": 12, "categoryId": "sicak"}, {"id": "sicak_07", "name": "Nane Limon", "price": 12, "categoryId": "sicak"}, {"id": "sicak_08", "name": "Papatya, Adaçayı", "price": 12, "categoryId": "sicak"}, {"id": "sicak_09", "name": "Nescafe", "price": 18, "categoryId": "sicak"}, {"id": "sicak_10", "name": "Sütlü Köpüklü", "price": 18, "categoryId": "sicak"}, {"id": "sicak_11", "name": "Mocha", "price": 23, "categoryId": "sicak"}, {"id": "sicak_12", "name": "Latte", "price": 23, "categoryId": "sicak"}, {"id": "sicak_13", "name": "Sıcak Çikolata", "price": 28, "categoryId": "sicak"}, {"id": "sicak_14", "name": "Oralet (karadut, kivi, elma, muz)", "price": 15, "categoryId": "sicak"}, {"id": "sicak_15", "name": "Tylolhot", "price": 45, "categoryId": "sicak"}]};
+
+  // 8 Symbolic Vector Icons
+  const ICONS = {
+    'utensils': { label: 'Yemek', svg: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>' },
+    'toast': { label: 'Tost', svg: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10V8a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"/><rect x="4" y="10" width="16" height="10" rx="2.5"/><path d="M8 14h8M9 17h6"/></svg>' },
+    'burger': { label: 'Ekmek Arası', svg: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16a8 8 0 0 0-16 0Z"/><path d="M3 15h18"/><path d="M5 15v2a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-2"/></svg>' },
+    'cookie': { label: 'Atıştırmalık', svg: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><circle cx="8.5" cy="8.5" r=".7" fill="currentColor"/><circle cx="16" cy="15.5" r=".7" fill="currentColor"/><circle cx="12" cy="12" r=".7" fill="currentColor"/><circle cx="11" cy="17" r=".7" fill="currentColor"/><circle cx="7" cy="14" r=".7" fill="currentColor"/></svg>' },
+    'hot-cup': { label: 'Sıcak İçecek', svg: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><path d="M6 2v3M10 2v3M14 2v3"/></svg>' },
+    'cold-cup': { label: 'Soğuk İçecek', svg: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 8 1.7 12.2a2 2 0 0 0 2 1.8h4.6a2 2 0 0 0 2-1.8L18 8"/><path d="M5 8h14"/><path d="M13 8V3l3-1"/><path d="M9.5 13h2v2h-2zM12.5 16h2v2h-2z"/></svg>' },
+    'coffee': { label: 'Kahve', svg: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v2M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/></svg>' },
+    'box': { label: 'Diğer', svg: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>' }
+  };
+
+  const COLORS = [
+    { id: 'amber', hex: '#f59e0b' },
+    { id: 'orange', hex: '#f97316' },
+    { id: 'rose', hex: '#f43f5e' },
+    { id: 'emerald', hex: '#10b981' },
+    { id: 'sky', hex: '#0ea5e9' },
+    { id: 'violet', hex: '#8b5cf6' },
+    { id: 'teal', hex: '#14b8a6' },
+    { id: 'slate', hex: '#64748b' }
+  ];
+
+  // Storage Keys & IndexedDB
+  const DB_NAME = 'KantinCeteleDB_v2';
+  const STORE_NAME = 'app_state';
+  const LS_KEY = 'kantin_cetele_state_v2';
+  const LS_BAK = 'kantin_cetele_backup_v2';
+
+  let dbInstance = null;
+  let persistGranted = false;
+  let lastSavedAt = null;
+  let xlsxFileHandle = null;
+
+  // App State
+  let state = createFreshState();
+  let ui = {
+    tab: 0,
+    weekView: 'grouped', // grouped | log
+    period: '90',        // 90 | 30 | all
+    includeActive: false,
+    topMetric: 'qty',    // qty | sum
+    menuCat: 'all',
+    menuQuery: '',
+    suggestIdx: 0,
+    suggestions: [],
+    parsedQty: 1,
+    carIdx: 0
+  };
+
+  function createFreshState() {
+    return {
+      schema: 2,
+      updatedAt: Date.now(),
+      menuVersion: DEFAULT_MENU.version,
+      menuDirty: false,
+      categories: DEFAULT_MENU.categories.map(c => ({ ...c, source: 'official' })),
+      products: DEFAULT_MENU.products.map(p => ({ ...p, source: 'official' })),
+      currentWeek: [], // { id, productId, name, categoryId, unitPrice, ts }
+      history: []      // { id, label, closedAt, total, items: [...] }
+    };
+  }
+
+  // ---------- IndexedDB + Multi-Layer Safe Storage ----------
+  function openDB() {
+    return new Promise((resolve) => {
+      if (!('indexedDB' in window)) return resolve(null);
+      try {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME);
+        };
+        req.onsuccess = () => { dbInstance = req.result; resolve(dbInstance); };
+        req.onerror = () => resolve(null);
+      } catch { resolve(null); }
+    });
+  }
+
+  function idbGet() {
+    return new Promise((resolve) => {
+      if (!dbInstance) return resolve(null);
+      try {
+        const tx = dbInstance.transaction(STORE_NAME, 'readonly');
+        const req = tx.objectStore(STORE_NAME).get('main');
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => resolve(null);
+      } catch { resolve(null); }
+    });
+  }
+
+  function idbPut(obj) {
+    return new Promise((resolve) => {
+      if (!dbInstance) return resolve(false);
+      try {
+        const tx = dbInstance.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).put(obj, 'main');
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
+      } catch { resolve(false); }
+    });
+  }
+
+  function readLS(key) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return (parsed && Array.isArray(parsed.products) && Array.isArray(parsed.currentWeek)) ? parsed : null;
+    } catch { return null; }
+  }
+
+  async function loadBestState() {
+    await openDB();
+    const candidates = [await idbGet(), readLS(LS_KEY), readLS(LS_BAK)].filter(Boolean);
+    if (!candidates.length) {
+      state = createFreshState();
+      await saveState(false);
+      return;
+    }
+    candidates.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+    const best = candidates[0];
+    state = {
+      ...createFreshState(),
+      ...best,
+      categories: Array.isArray(best.categories) && best.categories.length ? best.categories : createFreshState().categories,
+      products: Array.isArray(best.products) && best.products.length ? best.products : createFreshState().products,
+      currentWeek: Array.isArray(best.currentWeek) ? best.currentWeek : [],
+      history: Array.isArray(best.history) ? best.history : []
+    };
+    lastSavedAt = state.updatedAt || Date.now();
+  }
+
+  async function saveState(bumpTime = true) {
+    if (bumpTime) state.updatedAt = Date.now();
+    lastSavedAt = state.updatedAt;
+    const serialized = JSON.stringify(state);
+    try { localStorage.setItem(LS_KEY, serialized); } catch {}
+    try { localStorage.setItem(LS_BAK, serialized); } catch {}
+    await idbPut(state);
+  }
+
+  async function requestPersistence() {
+    try {
+      if (navigator.storage && navigator.storage.persist) {
+        persistGranted = await navigator.storage.persist();
+      }
+    } catch {}
+  }
+
+  // ---------- Remote menu.json Sync (Preserves debts & local items) ----------
+  async function syncRemoteMenu(manual = false) {
+    if (location.protocol === 'file:') {
+      if (manual) toast('GitHub Pages üzerinde otomatik senkronize olur');
+      return;
+    }
+    try {
+      const res = await fetch('./menu.json?t=' + Date.now(), { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const remote = await res.json();
+      if (!remote || !Array.isArray(remote.products) || !Array.isArray(remote.categories)) return;
+
+      const remoteVer = String(remote.version || remote.updatedAt || '');
+      let changedCount = 0;
+
+      // Merge categories (update official, keep custom)
+      const catById = new Map(state.categories.map(c => [c.id, c]));
+      for (const rc of remote.categories) {
+        const existing = catById.get(rc.id);
+        if (!existing) {
+          state.categories.push({ ...rc, source: 'official' });
+          changedCount++;
+        } else if (existing.name !== rc.name || existing.icon !== rc.icon || existing.color !== rc.color) {
+          if (existing.source !== 'local') {
+            Object.assign(existing, { name: rc.name, icon: rc.icon, color: rc.color, source: 'official' });
+            changedCount++;
+          }
+        }
+      }
+
+      // Merge products (update official prices/names for FUTURE orders; preserve local custom items)
+      const prodById = new Map(state.products.map(p => [p.id, p]));
+      const prodByNorm = new Map(state.products.map(p => [normText(p.name), p]));
+
+      for (const rp of remote.products) {
+        const match = prodById.get(rp.id) || prodByNorm.get(normText(rp.name));
+        if (!match) {
+          state.products.push({
+            id: rp.id || uid('p'),
+            name: rp.name,
+            price: Number(rp.price) || 0,
+            categoryId: rp.categoryId || state.categories[0].id,
+            source: 'official'
+          });
+          changedCount++;
+        } else {
+          const newPrice = Number(rp.price) || 0;
+          if (match.source !== 'local' && (match.price !== newPrice || match.name !== rp.name || match.categoryId !== rp.categoryId)) {
+            match.name = rp.name;
+            match.price = newPrice;
+            match.categoryId = rp.categoryId || match.categoryId;
+            match.source = 'official';
+            changedCount++;
+          }
+        }
+      }
+
+      const verChanged = remoteVer && remoteVer !== state.menuVersion;
+      if (verChanged || changedCount > 0) {
+        state.menuVersion = remoteVer || state.menuVersion;
+        await saveState();
+        renderAll();
+        toast(changedCount > 0
+          ? `Fiyat listesi güncellendi (${changedCount} değişiklik)`
+          : `Menü güncel (v${state.menuVersion})`);
+      } else if (manual) {
+        toast(`Fiyatlar zaten güncel (v${state.menuVersion})`);
+      }
+    } catch {
+      if (manual) toast('Çevrimdışı: kayıtlı menü kullanılıyor');
+    }
+  }
+
+  // ---------- Helpers ----------
+  const $ = (id) => document.getElementById(id);
+  const uid = (p = 'id') => p + '_' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+  const fmtTL = (n) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(Number(n) || 0) + ' ₺';
+  const esc = (s) => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function normText(str) {
+    return String(str || '')
+      .toLocaleLowerCase('tr-TR')
+      .replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ı/g, 'i')
+      .replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u')
+      .replace(/i̇/g, 'i')
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function getCat(id) {
+    return state.categories.find(c => c.id === id) || state.categories[0] || { id: 'other', name: 'Diğer', icon: 'box', color: 'slate' };
+  }
+
+  function catIconHtml(cat) {
+    const ico = (ICONS[cat?.icon] || ICONS.box).svg;
+    const col = cat?.color || 'slate';
+    return `<span class="cat-ico c-${esc(col)}">${ico}</span>`;
+  }
+
+  let toastTimer = null;
+  function toast(msg) {
+    const el = $('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+
+  // ---------- Monday Payment Countdown ----------
+  function renderMondayPill() {
+    const now = new Date();
+    const day = now.getDay(); // 0 Sun, 1 Mon ... 6 Sat
+    const pill = $('payPill');
+    const txt = $('payText');
+    const bar = $('payBar');
+
+    if (day === 1) {
+      pill.classList.add('today');
+      txt.textContent = 'Bugün Ödeme';
+      bar.style.width = '100%';
+      return;
+    }
+    pill.classList.remove('today');
+    const daysLeft = day === 0 ? 1 : (8 - day);
+    const nextMon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysLeft);
+    const monStr = nextMon.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+    const elapsed = 7 - daysLeft;
+    txt.textContent = `Pzt (${monStr}) • ${daysLeft}g`;
+    bar.style.width = Math.round((elapsed / 7) * 100) + '%';
+  }
+
+  // ---------- Fuzzy Turkish Search + Quantity Parser ----------
+  function parseQuery(raw) {
+    let q = String(raw || '').trim();
+    let qty = 1;
+    const lead = q.match(/^(\d+)\s*(?:x|adet|tane)?\s+(.+)$/i);
+    if (lead) {
+      qty = Math.max(1, Math.min(50, parseInt(lead[1], 10) || 1));
+      q = lead[2].trim();
+    } else {
+      const trail = q.match(/^(.+?)\s+(?:x\s*)?(\d+)$/i);
+      if (trail && !/\d/.test(trail[1])) {
+        qty = Math.max(1, Math.min(50, parseInt(trail[2], 10) || 1));
+        q = trail[1].trim();
+      }
+    }
+    return { qty, query: q };
+  }
+
+  function scoreMatch(queryNorm, targetNorm) {
+    if (!queryNorm) return 1;
+    if (targetNorm === queryNorm) return 1000;
+    if (targetNorm.startsWith(queryNorm)) return 850;
+    if (targetNorm.includes(queryNorm)) return 700;
+
+    const qTokens = queryNorm.split(' ').filter(Boolean);
+    const tTokens = targetNorm.split(' ').filter(Boolean);
+    let tokenScore = 0;
+    for (const qt of qTokens) {
+      let best = 0;
+      for (const tt of tTokens) {
+        if (tt === qt) best = Math.max(best, 180);
+        else if (tt.startsWith(qt)) best = Math.max(best, 140);
+        else if (tt.includes(qt)) best = Math.max(best, 95);
+        else if (qt.length >= 3 && isSubseq(qt, tt)) best = Math.max(best, 60);
+      }
+      if (best === 0) return 0;
+      tokenScore += best;
+    }
+    return tokenScore;
+  }
+
+  function isSubseq(a, b) {
+    let i = 0;
+    for (let j = 0; j < b.length && i < a.length; j++) if (a[i] === b[j]) i++;
+    return i === a.length;
+  }
+
+  function searchProducts(raw) {
+    const { qty, query } = parseQuery(raw);
+    const qn = normText(query);
+    if (!qn) return { qty, items: [] };
+    const scored = [];
+    for (const p of state.products) {
+      const s = scoreMatch(qn, normText(p.name));
+      if (s > 0) scored.push({ p, s });
+    }
+    scored.sort((a, b) => b.s - a.s || a.p.name.localeCompare(b.p.name, 'tr'));
+    return { qty, items: scored.slice(0, 7).map(x => x.p) };
+  }
+
+  // ---------- Week Operations ----------
+  async function addEntry(product, qty = 1) {
+    const now = Date.now();
+    for (let i = 0; i < qty; i++) {
+      state.currentWeek.push({
+        id: uid('e'),
+        productId: product.id,
+        name: product.name,
+        categoryId: product.categoryId,
+        unitPrice: Number(product.price) || 0,
+        ts: now + i
+      });
+    }
+    await saveState();
+    renderWeek();
+    if (ui.includeActive) renderAnalytics();
+    toast(qty > 1 ? `+${qty} ${product.name}` : `+1 ${product.name}`);
+  }
+
+  async function removeOneOfProduct(productId, name) {
+    for (let i = state.currentWeek.length - 1; i >= 0; i--) {
+      if (state.currentWeek[i].productId === productId || state.currentWeek[i].name === name) {
+        state.currentWeek.splice(i, 1);
+        await saveState();
+        renderWeek();
+        if (ui.includeActive) renderAnalytics();
+        return;
+      }
+    }
+  }
+
+  async function removeEntryById(entryId) {
+    state.currentWeek = state.currentWeek.filter(e => e.id !== entryId);
+    await saveState();
+    renderWeek();
+    if (ui.includeActive) renderAnalytics();
+  }
+
+  function buildWeekLabel() {
+    const now = new Date();
+    const start = state.currentWeek.length ? new Date(Math.min(...state.currentWeek.map(e => e.ts))) : now;
+    const f1 = start.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+    const f2 = now.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+    return f1 === f2 ? f2 : `${f1} – ${f2}`;
+  }
+
+  function groupItems(items) {
+    const map = new Map();
+    for (const e of items) {
+      const key = e.productId + '|' + e.unitPrice;
+      const cur = map.get(key);
+      if (cur) {
+        cur.qty += 1;
+        cur.sum += e.unitPrice;
+        cur.lastTs = Math.max(cur.lastTs, e.ts);
+      } else {
+        map.set(key, {
+          productId: e.productId,
+          name: e.name,
+          categoryId: e.categoryId,
+          unitPrice: e.unitPrice,
+          qty: 1,
+          sum: e.unitPrice,
+          lastTs: e.ts
+        });
+      }
+    }
+    return [...map.values()].sort((a, b) => b.sum - a.sum || b.qty - a.qty);
+  }
+
+  // ---------- Render: Panel 0 (Week) ----------
+  function renderWeek() {
+    const list = $('weekList');
+    const items = state.currentWeek;
+    const total = items.reduce((s, e) => s + (Number(e.unitPrice) || 0), 0);
+
+    $('weekTotal').textContent = fmtTL(total);
+    $('weekCountPill').textContent = `${items.length} ürün`;
+    $('closeWeekBtn').disabled = items.length === 0;
+    $('modeGrouped').classList.toggle('active', ui.weekView === 'grouped');
+    $('modeLog').classList.toggle('active', ui.weekView === 'log');
+
+    if (!items.length) {
+      list.innerHTML = `<div class="empty">
+        <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 9h8M8 13h5"/></svg>
+        <div style="font-weight:700;color:#334155">Bu hafta henüz kayıt yok</div>
+        <div style="font-size:12px">Yukarıdan ürün adını yazıp Enter ile ekle</div>
+      </div>`;
+      return;
+    }
+
+    if (ui.weekView === 'grouped') {
+      const grouped = groupItems(items);
+      list.innerHTML = grouped.map(g => {
+        const cat = getCat(g.categoryId);
+        return `<div class="item-card">
+          ${catIconHtml(cat)}
+          <div class="item-info">
+            <div class="item-title">${esc(g.name)}</div>
+            <div class="item-meta"><span>${fmtTL(g.unitPrice)}</span></div>
+          </div>
+          <div class="stepper">
+            <button type="button" data-dec="${esc(g.productId)}" data-name="${esc(g.name)}">−</button>
+            <span>${g.qty}</span>
+            <button type="button" data-inc="${esc(g.productId)}">+</button>
+          </div>
+          <div class="item-total">${fmtTL(g.sum)}</div>
+        </div>`;
+      }).join('');
+    } else {
+      const sorted = [...items].sort((a, b) => b.ts - a.ts);
+      list.innerHTML = sorted.map(e => {
+        const cat = getCat(e.categoryId);
+        const dt = new Date(e.ts).toLocaleString('tr-TR', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+        return `<div class="item-card">
+          ${catIconHtml(cat)}
+          <div class="item-info">
+            <div class="item-title">${esc(e.name)}</div>
+            <div class="item-meta"><span>${esc(dt)}</span></div>
+          </div>
+          <div class="item-total">${fmtTL(e.unitPrice)}</div>
+          <button class="del-btn" type="button" data-del-entry="${esc(e.id)}" aria-label="Sil">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // ---------- Render: Panel 1 (Analytics) ----------
+  function renderAnalytics() {
+    const now = Date.now();
+    const cutoff = ui.period === 'all' ? 0 : now - Number(ui.period) * 86400000;
+    const weeks = state.history.filter(w => (w.closedAt || 0) >= cutoff);
+
+    let allEntries = [];
+    weeks.forEach(w => { if (Array.isArray(w.items)) allEntries.push(...w.items); });
+    if (ui.includeActive && state.currentWeek.length) {
+      allEntries.push(...state.currentWeek);
+    }
+
+    const totalSpent = allEntries.reduce((s, e) => s + (Number(e.unitPrice) || 0), 0);
+    const weekDivisor = weeks.length + (ui.includeActive && state.currentWeek.length ? 1 : 0);
+    const avgWeek = weekDivisor ? totalSpent / weekDivisor : 0;
+
+    $('kpiTotal').textContent = fmtTL(totalSpent);
+    $('kpiAvg').textContent = fmtTL(Math.round(avgWeek));
+    $('kpiQty').textContent = String(allEntries.length);
+    $('weeksCountLbl').textContent = `${weeks.length} hafta`;
+    $('includeActiveBtn').style.background = ui.includeActive ? '#0f172a' : '';
+    $('includeActiveBtn').style.color = ui.includeActive ? '#fff' : '';
+    $('includeActiveBtn').style.borderColor = ui.includeActive ? '#0f172a' : '';
+
+    // Card 0: Top 6 Products
+    const prodAgg = new Map();
+    for (const e of allEntries) {
+      const k = e.name;
+      const cur = prodAgg.get(k) || { name: e.name, categoryId: e.categoryId, qty: 0, sum: 0 };
+      cur.qty += 1;
+      cur.sum += Number(e.unitPrice) || 0;
+      prodAgg.set(k, cur);
+    }
+    const topArr = [...prodAgg.values()]
+      .sort((a, b) => ui.topMetric === 'qty' ? (b.qty - a.qty || b.sum - a.sum) : (b.sum - a.sum || b.qty - a.qty))
+      .slice(0, 6);
+
+    if (!topArr.length) {
+      $('top6Body').innerHTML = `<div class="empty"><div style="font-size:12.5px">Hafta kapattıkça en çok aldığın 6 ürün burada listelenir</div></div>`;
+    } else {
+      const maxV = Math.max(...topArr.map(x => ui.topMetric === 'qty' ? x.qty : x.sum), 1);
+      $('top6Body').innerHTML = topArr.map((item, idx) => {
+        const cat = getCat(item.categoryId);
+        const val = ui.topMetric === 'qty' ? item.qty : item.sum;
+        const pct = Math.max(6, Math.round((val / maxV) * 100));
+        const valStr = ui.topMetric === 'qty' ? `${item.qty} adet • ${fmtTL(item.sum)}` : `${fmtTL(item.sum)} • ${item.qty}x`;
+        return `<div class="bar-row">
+          <div class="bar-top">
+            <span style="font-weight:800;color:#94a3b8;width:16px">${idx + 1}.</span>
+            <span class="cat-ico c-${esc(cat.color)}" style="width:24px;height:24px;border-radius:7px">${(ICONS[cat.icon] || ICONS.box).svg}</span>
+            <span class="bar-name">${esc(item.name)}</span>
+            <span class="bar-val">${valStr}</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        </div>`;
+      }).join('');
+    }
+
+    // Card 1: Week by Week
+    if (!weeks.length) {
+      $('weeksBody').innerHTML = `<div class="empty"><div style="font-size:12.5px">Ödediğin haftalar burada birikir</div></div>`;
+    } else {
+      $('weeksBody').innerHTML = weeks.map(w => {
+        const dStr = new Date(w.closedAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+        return `<button class="week-row" type="button" data-open-week="${esc(w.id)}">
+          <div>
+            <div style="font-weight:700;font-size:13.5px">${esc(w.label)}</div>
+            <div style="font-size:11.5px;color:#64748b">${w.items.length} ürün • Ödendi: ${dStr}</div>
+          </div>
+          <div style="font-weight:800;font-size:14.5px;color:#059669">${fmtTL(w.total)}</div>
+        </button>`;
+      }).join('');
+    }
+
+    // Card 2: Categories
+    const catAgg = new Map();
+    for (const e of allEntries) {
+      const c = getCat(e.categoryId);
+      const cur = catAgg.get(c.id) || { cat: c, sum: 0, qty: 0 };
+      cur.sum += Number(e.unitPrice) || 0;
+      cur.qty += 1;
+      catAgg.set(c.id, cur);
+    }
+    const catArr = [...catAgg.values()].sort((a, b) => b.sum - a.sum);
+    if (!catArr.length) {
+      $('catsBody').innerHTML = `<div class="empty"><div style="font-size:12.5px">Kategori harcama dağılımı burada görünür</div></div>`;
+    } else {
+      $('catsBody').innerHTML = catArr.map(x => {
+        const pct = totalSpent ? Math.round((x.sum / totalSpent) * 100) : 0;
+        return `<div class="bar-row">
+          <div class="bar-top">
+            <span class="cat-ico c-${esc(x.cat.color)}" style="width:24px;height:24px;border-radius:7px">${(ICONS[x.cat.icon] || ICONS.box).svg}</span>
+            <span class="bar-name">${esc(x.cat.name)}</span>
+            <span class="bar-val">%${pct} • ${fmtTL(x.sum)}</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.max(4, pct)}%"></div></div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // ---------- Render: Panel 2 (Menu) ----------
+  function renderMenu() {
+    $('xlsxDirty').style.display = state.menuDirty ? 'block' : 'none';
+    $('jsonDirty').style.display = state.menuDirty ? 'block' : 'none';
+
+    // Category Chips
+    const counts = new Map();
+    state.products.forEach(p => counts.set(p.categoryId, (counts.get(p.categoryId) || 0) + 1));
+
+    const chips = [
+      `<button class="chip ${ui.menuCat === 'all' ? 'active' : ''}" data-cat="all" type="button">Tümü (${state.products.length})</button>`,
+      ...state.categories.map(c => {
+        const ico = (ICONS[c.icon] || ICONS.box).svg;
+        const active = ui.menuCat === c.id;
+        return `<button class="chip ${active ? 'active' : ''}" data-cat="${esc(c.id)}" type="button">
+          ${ico}<span>${esc(c.name)} (${counts.get(c.id) || 0})</span>
+        </button>`;
+      })
+    ];
+    $('catChips').innerHTML = chips.join('');
+
+    // Filtered Products
+    const qn = normText(ui.menuQuery);
+    let prods = state.products.filter(p => ui.menuCat === 'all' || p.categoryId === ui.menuCat);
+    if (qn) prods = prods.filter(p => normText(p.name).includes(qn));
+
+    const activeCatObj = ui.menuCat !== 'all' ? state.categories.find(c => c.id === ui.menuCat) : null;
+    let html = '';
+    if (activeCatObj) {
+      html += `<div class="item-card" style="background:#f8fafc;border-style:dashed">
+        ${catIconHtml(activeCatObj)}
+        <div class="item-info">
+          <div class="item-title">${esc(activeCatObj.name)}</div>
+          <div class="item-meta">Kategori ayarını düzenle</div>
+        </div>
+        <button class="t-btn" type="button" data-edit-cat="${esc(activeCatObj.id)}">Düzenle</button>
+      </div>`;
+    }
+
+    if (!prods.length) {
+      html += `<div class="empty"><div style="font-size:12.5px">Bu filtrede ürün yok</div></div>`;
+    } else {
+      html += prods.map(p => {
+        const cat = getCat(p.categoryId);
+        return `<div class="item-card">
+          ${catIconHtml(cat)}
+          <div class="item-info">
+            <div class="item-title">${esc(p.name)} ${p.source === 'local' ? '<span class="tag-local">Özel</span>' : ''}</div>
+            <div class="item-meta"><span>${esc(cat.name)}</span></div>
+          </div>
+          <div class="item-total" style="color:#059669">${fmtTL(p.price)}</div>
+          <button class="del-btn" type="button" data-edit-prod="${esc(p.id)}" title="Düzenle">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+          </button>
+        </div>`;
+      }).join('');
+    }
+    $('menuList').innerHTML = html;
+  }
+
+  function renderAll() {
+    renderMondayPill();
+    renderWeek();
+    renderAnalytics();
+    renderMenu();
+  }
+
+  // ---------- Search Suggestions UI ----------
+  function updateSuggestions() {
+    const raw = $('searchInput').value;
+    $('clearSearch').classList.toggle('show', raw.length > 0);
+    const box = $('suggestBox');
+    if (!raw.trim()) {
+      box.classList.remove('open');
+      ui.suggestions = [];
+      return;
+    }
+    const { qty, items } = searchProducts(raw);
+    ui.parsedQty = qty;
+    ui.suggestions = items;
+    ui.suggestIdx = 0;
+
+    if (!items.length) {
+      box.innerHTML = `<div style="padding:12px;font-size:12.5px;color:#64748b;display:flex;justify-content:space-between;align-items:center">
+        <span>Eşleşen ürün bulunamadı</span>
+        <button id="quickAddMissing" class="t-btn primary" type="button">+ Yeni Ekle</button>
+      </div>`;
+      box.classList.add('open');
+      $('quickAddMissing').onclick = () => {
+        const name = parseQuery(raw).query;
+        box.classList.remove('open');
+        openProductModal(null, name);
+      };
+      return;
+    }
+
+    renderSuggestItems();
+    box.classList.add('open');
+  }
+
+  function renderSuggestItems() {
+    const box = $('suggestBox');
+    box.innerHTML = ui.suggestions.map((p, i) => {
+      const cat = getCat(p.categoryId);
+      const qBadge = ui.parsedQty > 1 ? `<span class="qty-badge">${ui.parsedQty}×</span>` : '';
+      return `<button class="suggest-item ${i === ui.suggestIdx ? 'active' : ''}" type="button" data-pick-idx="${i}">
+        ${catIconHtml(cat)}
+        <div class="suggest-name">${qBadge}${esc(p.name)}<span class="suggest-sub">${esc(cat.name)}</span></div>
+        <span class="suggest-price">${fmtTL(p.price * ui.parsedQty)}</span>
+      </button>`;
+    }).join('');
+  }
+
+  async function pickSuggestion(idx) {
+    const prod = ui.suggestions[idx];
+    if (!prod) return;
+    await addEntry(prod, ui.parsedQty);
+    $('searchInput').value = '';
+    $('clearSearch').classList.remove('show');
+    $('suggestBox').classList.remove('open');
+    ui.suggestions = [];
+  }
+
+  // ---------- Modals ----------
+  function openSheet(html) {
+    $('sheet').innerHTML = html;
+    $('backdrop').classList.add('open');
+  }
+  function closeSheet() {
+    $('backdrop').classList.remove('open');
+  }
+  $('backdrop').addEventListener('click', (e) => { if (e.target === $('backdrop')) closeSheet(); });
+
+  // Product Modal (Add / Edit)
+  function openProductModal(prodId = null, prefillName = '') {
+    const existing = prodId ? state.products.find(p => p.id === prodId) : null;
+    const catOpts = state.categories.map(c =>
+      `<option value="${esc(c.id)}" ${(existing ? existing.categoryId === c.id : (ui.menuCat !== 'all' && ui.menuCat === c.id)) ? 'selected' : ''}>${esc(c.name)}</option>`
+    ).join('');
+
+    openSheet(`
+      <div class="sheet-head">
+        <span class="sheet-title">${existing ? 'Ürünü Düzenle' : 'Yeni Ürün Ekle'}</span>
+        <button type="button" id="mClose" class="del-btn">✕</button>
+      </div>
+      <div class="field">
+        <label>Ürün Adı</label>
+        <input id="pName" type="text" value="${esc(existing ? existing.name : prefillName)}" placeholder="Örn: Su 0.5L, Çubuk Kraker" />
+      </div>
+      <div class="field">
+        <label>Fiyat (₺)</label>
+        <input id="pPrice" type="number" inputmode="decimal" step="0.5" min="0" value="${existing ? existing.price : ''}" placeholder="Örn: 20" />
+      </div>
+      <div class="field">
+        <label>Kategori</label>
+        <select id="pCat">${catOpts}</select>
+      </div>
+      <div class="btn-row">
+        ${existing ? '<button id="pDel" class="btn btn-danger" type="button" style="flex:.55">Sil</button>' : ''}
+        <button id="pSave" class="btn btn-emerald" type="button">Kaydet</button>
+      </div>
+    `);
+
+    $('mClose').onclick = closeSheet;
+    setTimeout(() => $('pName').focus(), 60);
+
+    $('pSave').onclick = async () => {
+      const name = $('pName').value.trim();
+      const price = parseFloat($('pPrice').value);
+      const categoryId = $('pCat').value;
+      if (!name || isNaN(price) || price < 0) return toast('Geçerli ad ve fiyat gir');
+      if (existing) {
+        existing.name = name;
+        existing.price = price;
+        existing.categoryId = categoryId;
+      } else {
+        state.products.push({ id: uid('p'), name, price, categoryId, source: 'local' });
+      }
+      state.menuDirty = true;
+      await saveState();
+      renderMenu();
+      closeSheet();
+      toast(existing ? 'Ürün güncellendi' : 'Ürün eklendi');
+    };
+
+    if (existing && $('pDel')) {
+      $('pDel').onclick = async () => {
+        state.products = state.products.filter(p => p.id !== existing.id);
+        state.menuDirty = true;
+        await saveState();
+        renderMenu();
+        closeSheet();
+        toast('Ürün silindi');
+      };
+    }
+  }
+
+  // Category Modal (Add / Edit with 8 Vector Icons)
+  function openCategoryModal(catId = null) {
+    const existing = catId ? state.categories.find(c => c.id === catId) : null;
+    let selIcon = existing ? existing.icon : 'cookie';
+    let selColor = existing ? existing.color : 'violet';
+
+    openSheet(`
+      <div class="sheet-head">
+        <span class="sheet-title">${existing ? 'Kategoriyi Düzenle' : 'Yeni Kategori'}</span>
+        <button type="button" id="mClose" class="del-btn">✕</button>
+      </div>
+      <div class="field">
+        <label>Kategori Adı</label>
+        <input id="cName" type="text" value="${esc(existing ? existing.name : '')}" placeholder="Örn: Atıştırmalık, Soğuk İçecek" />
+      </div>
+      <div class="field">
+        <label>Sembol İkon</label>
+        <div class="icon-grid" id="icoGrid">
+          ${Object.entries(ICONS).map(([k, v]) => `
+            <button type="button" class="ico-pick ${k === selIcon ? 'active' : ''}" data-ico="${k}">
+              ${v.svg}<span>${v.label}</span>
+            </button>`).join('')}
+        </div>
+      </div>
+      <div class="field">
+        <label>Renk</label>
+        <div class="color-row" id="colRow">
+          ${COLORS.map(c => `<button type="button" class="col-dot ${c.id === selColor ? 'active' : ''}" data-col="${c.id}" style="background:${c.hex}"></button>`).join('')}
+        </div>
+      </div>
+      <div class="btn-row">
+        ${existing && state.categories.length > 1 ? '<button id="cDel" class="btn btn-danger" type="button" style="flex:.55">Sil</button>' : ''}
+        <button id="cSave" class="btn btn-emerald" type="button">Kaydet</button>
+      </div>
+    `);
+
+    $('mClose').onclick = closeSheet;
+    $('icoGrid').onclick = (e) => {
+      const btn = e.target.closest('[data-ico]');
+      if (!btn) return;
+      selIcon = btn.dataset.ico;
+      $('icoGrid').querySelectorAll('.ico-pick').forEach(b => b.classList.toggle('active', b === btn));
+    };
+    $('colRow').onclick = (e) => {
+      const btn = e.target.closest('[data-col]');
+      if (!btn) return;
+      selColor = btn.dataset.col;
+      $('colRow').querySelectorAll('.col-dot').forEach(b => b.classList.toggle('active', b === btn));
+    };
+
+    $('cSave').onclick = async () => {
+      const name = $('cName').value.trim();
+      if (!name) return toast('Kategori adı gir');
+      if (existing) {
+        existing.name = name;
+        existing.icon = selIcon;
+        existing.color = selColor;
+      } else {
+        state.categories.push({ id: uid('cat'), name, icon: selIcon, color: selColor, source: 'local' });
+      }
+      state.menuDirty = true;
+      await saveState();
+      renderAll();
+      closeSheet();
+      toast(existing ? 'Kategori güncellendi' : 'Kategori eklendi');
+    };
+
+    if (existing && $('cDel')) {
+      $('cDel').onclick = async () => {
+        const fallbackId = state.categories.find(c => c.id !== existing.id).id;
+        state.products.forEach(p => { if (p.categoryId === existing.id) p.categoryId = fallbackId; });
+        state.categories = state.categories.filter(c => c.id !== existing.id);
+        if (ui.menuCat === existing.id) ui.menuCat = 'all';
+        state.menuDirty = true;
+        await saveState();
+        renderAll();
+        closeSheet();
+        toast('Kategori silindi');
+      };
+    }
+  }
+
+  // Bulk Paste Modal
+  function openBulkModal() {
+    openSheet(`
+      <div class="sheet-head">
+        <span class="sheet-title">Toplu Not Yapıştır</span>
+        <button type="button" id="mClose" class="del-btn">✕</button>
+      </div>
+      <div class="field">
+        <label>Her satıra bir ürün yaz (örn: 2 cay, kasarli tost)</label>
+        <textarea id="bulkTxt" rows="5" placeholder="2 buyuk cay&#10;kasarli tost&#10;patso"></textarea>
+      </div>
+      <div id="bulkPreview" class="info-box" style="display:none;max-height:160px;overflow-y:auto"></div>
+      <div class="btn-row">
+        <button id="bulkAdd" class="btn btn-emerald" type="button">Eşleşenleri Ekle</button>
+      </div>
+    `);
+    $('mClose').onclick = closeSheet;
+    let parsedMatches = [];
+
+    const parseBulk = () => {
+      const lines = $('bulkTxt').value.split('\n').map(s => s.trim()).filter(Boolean);
+      parsedMatches = [];
+      if (!lines.length) { $('bulkPreview').style.display = 'none'; return; }
+      const html = lines.map(line => {
+        const { qty, items } = searchProducts(line);
+        if (items.length) {
+          parsedMatches.push({ prod: items[0], qty });
+          return `<div class="info-line"><span>✓ ${qty}× ${esc(items[0].name)}</span><b>${fmtTL(items[0].price * qty)}</b></div>`;
+        }
+        return `<div class="info-line" style="color:#ef4444"><span>✕ ${esc(line)}</span><span>Bulunamadı</span></div>`;
+      }).join('');
+      $('bulkPreview').innerHTML = html;
+      $('bulkPreview').style.display = 'flex';
+    };
+
+    $('bulkTxt').addEventListener('input', parseBulk);
+    $('bulkAdd').onclick = async () => {
+      parseBulk();
+      if (!parsedMatches.length) return toast('Eşleşen ürün yok');
+      for (const m of parsedMatches) await addEntry(m.prod, m.qty);
+      closeSheet();
+      toast(`${parsedMatches.reduce((s, m) => s + m.qty, 0)} ürün eklendi`);
+    };
+  }
+
+  // Close Week Confirm Modal
+  function openCloseWeekModal() {
+    const total = state.currentWeek.reduce((s, e) => s + e.unitPrice, 0);
+    const defLabel = buildWeekLabel();
+    openSheet(`
+      <div class="sheet-head">
+        <span class="sheet-title">Haftayı Öde & Kapat</span>
+        <button type="button" id="mClose" class="del-btn">✕</button>
+      </div>
+      <div class="info-box">
+        <div class="info-line"><span>Toplam Ürün</span><b>${state.currentWeek.length} adet</b></div>
+        <div class="info-line"><span>Ödenecek Tutar</span><b style="color:#059669;font-size:16px">${fmtTL(total)}</b></div>
+      </div>
+      <div class="field">
+        <label>Hafta Etiketi</label>
+        <input id="wkLabel" type="text" value="${esc(defLabel)}" />
+      </div>
+      <div class="btn-row">
+        <button id="wkCancel" class="btn btn-soft" type="button">Vazgeç</button>
+        <button id="wkConfirm" class="btn btn-emerald" type="button">Ödedim, Arşivle</button>
+      </div>
+    `);
+    $('mClose').onclick = closeSheet;
+    $('wkCancel').onclick = closeSheet;
+    $('wkConfirm').onclick = async () => {
+      const label = $('wkLabel').value.trim() || defLabel;
+      state.history.unshift({
+        id: uid('w'),
+        label,
+        closedAt: Date.now(),
+        total,
+        items: state.currentWeek.map(e => ({ ...e }))
+      });
+      state.currentWeek = [];
+      await saveState();
+      renderAll();
+      closeSheet();
+      toast('Hafta arşivlendi, yeni hafta açıldı');
+    };
+  }
+
+  // Week Detail Modal
+  function openWeekDetail(weekId) {
+    const w = state.history.find(x => x.id === weekId);
+    if (!w) return;
+    const grouped = groupItems(w.items || []);
+    openSheet(`
+      <div class="sheet-head">
+        <span class="sheet-title">${esc(w.label)}</span>
+        <button type="button" id="mClose" class="del-btn">✕</button>
+      </div>
+      <div class="info-box" style="max-height:260px;overflow-y:auto">
+        ${grouped.map(g => `<div class="info-line"><span>${g.qty}× ${esc(g.name)}</span><b>${fmtTL(g.sum)}</b></div>`).join('')}
+        <div class="info-line" style="border-top:1px solid #e2e8f0;padding-top:6px;margin-top:4px">
+          <b>Toplam</b><b style="color:#059669">${fmtTL(w.total)}</b>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button id="wDel" class="btn btn-danger" type="button">Kaydı Sil</button>
+        <button id="wOk" class="btn btn-primary" type="button">Kapat</button>
+      </div>
+    `);
+    $('mClose').onclick = closeSheet;
+    $('wOk').onclick = closeSheet;
+    $('wDel').onclick = async () => {
+      state.history = state.history.filter(x => x.id !== w.id);
+      await saveState();
+      renderAnalytics();
+      closeSheet();
+      toast('Hafta kaydı silindi');
+    };
+  }
+
+  // Shield / Data Safety & Install Modal
+  function openSafetyModal() {
+    const savedStr = lastSavedAt ? new Date(lastSavedAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    openSheet(`
+      <div class="sheet-head">
+        <span class="sheet-title">Veri Güvenliği & Yedek</span>
+        <button type="button" id="mClose" class="del-btn">✕</button>
+      </div>
+      <div class="info-box">
+        <div class="info-line"><span>Kayıt Katmanı</span><b>IndexedDB + Çift Yedek</b></div>
+        <div class="info-line"><span>Kalıcı Depolama</span><b>${persistGranted ? 'Aktif ✓' : 'Standart'}</b></div>
+        <div class="info-line"><span>Son Kayıt</span><b>${savedStr}</b></div>
+        <div class="info-line"><span>Menü Sürümü</span><b>v${esc(state.menuVersion)}</b></div>
+        <div class="info-line"><span>Uygulama Modu</span><b>${isStandalone ? 'Ana Ekran (PWA) ✓' : 'Tarayıcı'}</b></div>
+      </div>
+      <div class="btn-row">
+        <button id="btnBackupDown" class="btn btn-primary" type="button">Tam Yedek İndir</button>
+        <button id="btnBackupUp" class="btn btn-soft" type="button">Yedek Yükle</button>
+      </div>
+      <button id="btnCheckPrices" class="btn btn-emerald" type="button">GitHub Fiyatlarını Kontrol Et</button>
+      ${!isStandalone ? `<div class="info-box" style="font-size:12px;color:#475569">
+        <b>Ana Ekrana Ekle (Veri Koruması İçin Önerilir)</b>
+        <div>• <b>iPhone (Safari):</b> Alt menü Paylaş → Ana Ekrana Ekle</div>
+        <div>• <b>Android (Chrome):</b> Sağ üst ⋮ → Ana ekrana ekle</div>
+      </div>` : ''}
+    `);
+    $('mClose').onclick = closeSheet;
+    $('btnBackupDown').onclick = () => {
+      const d = new Date().toISOString().slice(0, 10);
+      downloadBlob(JSON.stringify(state, null, 2), `Kantin_Yedek_${d}.json`, 'application/json');
+      toast('Tam yedek indirildi');
+    };
+    $('btnBackupUp').onclick = () => $('jsonBackupInput').click();
+    $('btnCheckPrices').onclick = async () => { await syncRemoteMenu(true); closeSheet(); };
+  }
+
+  // ---------- WhatsApp Share ----------
+  async function shareWhatsApp() {
+    if (!state.currentWeek.length) return toast('Paylaşılacak ürün yok');
+    const grouped = groupItems(state.currentWeek);
+    const total = state.currentWeek.reduce((s, e) => s + e.unitPrice, 0);
+    const lines = [
+      `🧾 *Kantin Çetele (${buildWeekLabel()})*`,
+      ...grouped.map(g => `• ${g.qty}× ${g.name} — ${fmtTL(g.sum)}`),
+      `*Toplam: ${fmtTL(total)}*`
+    ];
+    const text = lines.join('\n');
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Kantin Çetele', text });
+        return;
+      }
+    } catch {}
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('Özet panoya kopyalandı');
+    } catch {
+      window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+    }
+  }
+
+  // ---------- Export / Import: menu.json & Excel (.xlsx) ----------
+  function downloadBlob(content, filename, mime) {
+    const blob = content instanceof Blob ? content : new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function nextMenuVersion() {
+    const today = new Date().toISOString().slice(0, 10).replace(/-/g, '.');
+    const parts = String(state.menuVersion || '').split('.');
+    const prevDate = parts.slice(0, 3).join('.');
+    const rev = prevDate === today ? (parseInt(parts[3] || '1', 10) + 1) : 1;
+    return `${today}.${rev}`;
+  }
+
+  async function exportMenuJson() {
+    const ver = nextMenuVersion();
+    const payload = {
+      version: ver,
+      updatedAt: new Date().toISOString().slice(0, 10),
+      currency: '₺',
+      categories: state.categories.map(({ id, name, icon, color }) => ({ id, name, icon, color })),
+      products: state.products.map(({ id, name, price, categoryId }) => ({ id, name, price, categoryId }))
+    };
+    state.menuVersion = ver;
+    state.menuDirty = false;
+    await saveState();
+    renderMenu();
+    downloadBlob(JSON.stringify(payload, null, 2), 'menu.json', 'application/json');
+    toast(`menu.json indirildi (v${ver})`);
+  }
+
+  async function exportExcel() {
+    if (typeof XLSX === 'undefined') {
+      // Offline CSV fallback if SheetJS wasn't cached yet
+      const rows = ['Ürün,Kategori,Fiyat', ...state.products.map(p => `"${p.name.replace(/"/g, '""')}","${getCat(p.categoryId).name}",${p.price}`)];
+      downloadBlob('\uFEFF' + rows.join('\n'), 'Kantin_Fiyat_Listesi.csv', 'text/csv;charset=utf-8');
+      return toast('Çevrimdışı CSV indirildi');
+    }
+    const wb = XLSX.utils.book_new();
+
+    const menuRows = state.products.map(p => ({
+      'Ürün Adı': p.name,
+      'Kategori': getCat(p.categoryId).name,
+      'Fiyat (TL)': p.price
+    }));
+    const wsMenu = XLSX.utils.json_to_sheet(menuRows);
+    wsMenu['!cols'] = [{ wch: 32 }, { wch: 22 }, { wch: 12 }];
+    XLSX.utils.book_append_sheet(wb, wsMenu, 'Fiyat Listesi');
+
+    const weekRows = groupItems(state.currentWeek).map(g => ({
+      'Ürün': g.name,
+      'Adet': g.qty,
+      'Birim Fiyat': g.unitPrice,
+      'Toplam (TL)': g.sum
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(weekRows.length ? weekRows : [{ 'Bilgi': 'Aktif haftada kayıt yok' }]), 'Aktif Hafta');
+
+    const histRows = state.history.map(w => ({
+      'Hafta': w.label,
+      'Ödeme Tarihi': new Date(w.closedAt).toLocaleDateString('tr-TR'),
+      'Ürün Adedi': w.items.length,
+      'Toplam (TL)': w.total
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(histRows.length ? histRows : [{ 'Bilgi': 'Henüz kapalı hafta yok' }]), 'Haftalık Geçmiş');
+
+    const catRows = state.categories.map(c => ({ 'ID': c.id, 'Kategori': c.name, 'İkon': c.icon, 'Renk': c.color }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(catRows), 'Kategoriler');
+
+    const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+    // Desktop File System Access API overwrite support
+    if (window.showSaveFilePicker && !/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+      try {
+        if (!xlsxFileHandle) {
+          xlsxFileHandle = await window.showSaveFilePicker({
+            suggestedName: 'Kantin_Fiyat_Listesi.xlsx',
+            types: [{ description: 'Excel', accept: { 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'] } }]
+          });
+        }
+        const writable = await xlsxFileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        state.menuDirty = false;
+        await saveState();
+        renderMenu();
+        return toast('Excel dosyası güncellendi ✓');
+      } catch (err) {
+        if (err && err.name === 'AbortError') return;
+      }
+    }
+
+    downloadBlob(blob, 'Kantin_Fiyat_Listesi.xlsx', blob.type);
+    state.menuDirty = false;
+    await saveState();
+    renderMenu();
+    toast('Kantin_Fiyat_Listesi.xlsx indirildi');
+  }
+
+  function guessIconForCat(name) {
+    const n = normText(name);
+    if (n.includes('soguk') || n.includes('kola') || n.includes('su') || n.includes('ayran')) return { icon: 'cold-cup', color: 'sky' };
+    if (n.includes('sicak') || n.includes('cay') || n.includes('icecek')) return { icon: 'hot-cup', color: 'emerald' };
+    if (n.includes('kahve')) return { icon: 'coffee', color: 'amber' };
+    if (n.includes('tost')) return { icon: 'toast', color: 'orange' };
+    if (n.includes('biskuvi') || n.includes('atistir') || n.includes('cikolata') || n.includes('cips')) return { icon: 'cookie', color: 'violet' };
+    if (n.includes('ekmek') || n.includes('durum') || n.includes('sandvic')) return { icon: 'burger', color: 'rose' };
+    if (n.includes('tava') || n.includes('yemek') || n.includes('yumurta')) return { icon: 'utensils', color: 'amber' };
+    return { icon: 'box', color: 'slate' };
+  }
+
+  async function importExcelFile(file) {
+    if (typeof XLSX === 'undefined') return toast('Excel kütüphanesi için internet gerekli');
+    try {
+      const data = await file.arrayBuffer();
+      const wb = XLSX.read(data, { type: 'array' });
+      const ws = wb.Sheets['Fiyat Listesi'] || wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      let updated = 0, added = 0;
+
+      for (const row of rows) {
+        const keys = Object.keys(row);
+        const nameKey = keys.find(k => /urun|ürün|ad|name/i.test(k)) || keys[0];
+        const priceKey = keys.find(k => /fiyat|price|tl|tutar/i.test(k)) || keys[keys.length - 1];
+        const catKey = keys.find(k => /kat|cat|grup/i.test(k));
+
+        const name = String(row[nameKey] || '').trim();
+        const price = parseFloat(String(row[priceKey] || '').replace(',', '.').replace(/[^\d.]/g, ''));
+        if (!name || isNaN(price)) continue;
+
+        let catId = state.categories[0].id;
+        if (catKey && String(row[catKey]).trim()) {
+          const catName = String(row[catKey]).trim();
+          let cat = state.categories.find(c => normText(c.name) === normText(catName));
+          if (!cat) {
+            const g = guessIconForCat(catName);
+            cat = { id: uid('cat'), name: catName, icon: g.icon, color: g.color, source: 'local' };
+            state.categories.push(cat);
+          }
+          catId = cat.id;
+        }
+
+        const existing = state.products.find(p => normText(p.name) === normText(name));
+        if (existing) {
+          existing.price = price;
+          existing.categoryId = catId;
+          updated++;
+        } else {
+          state.products.push({ id: uid('p'), name, price, categoryId: catId, source: 'local' });
+          added++;
+        }
+      }
+
+      if (updated + added === 0) return toast('Geçerli ürün satırı bulunamadı');
+      state.menuDirty = true;
+      await saveState();
+      renderAll();
+      toast(`Excel yüklendi: ${added} yeni, ${updated} güncellendi`);
+    } catch {
+      toast('Excel dosyası okunamadı');
+    }
+  }
+
+  // ---------- Horizontal Tab Navigation & Touch Swipe ----------
+  function setTab(idx) {
+    ui.tab = Math.max(0, Math.min(2, idx));
+    $('track').style.transform = `translate3d(-${ui.tab * 100}%, 0, 0)`;
+    document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', Number(b.dataset.tab) === ui.tab));
+    if (ui.tab === 1) renderAnalytics();
+    if (ui.tab === 2) renderMenu();
+  }
+
+  // Smart horizontal swipe (ignores nested horizontal carousels & chips)
+  let swipe = null;
+  $('viewport').addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    if (e.target.closest('[data-no-panel-swipe]') || e.target.closest('input,textarea,select')) return;
+    swipe = { x: e.touches[0].clientX, y: e.touches[0].clientY, dx: 0, locked: null };
+  }, { passive: true });
+
+  $('viewport').addEventListener('touchmove', (e) => {
+    if (!swipe) return;
+    const dx = e.touches[0].clientX - swipe.x;
+    const dy = e.touches[0].clientY - swipe.y;
+    if (swipe.locked === null && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
+      swipe.locked = Math.abs(dx) > Math.abs(dy) * 1.15 ? 'x' : 'y';
+      if (swipe.locked === 'x') $('track').classList.add('dragging');
+    }
+    if (swipe.locked === 'x') {
+      swipe.dx = dx;
+      const w = $('viewport').clientWidth || 1;
+      const base = -ui.tab * w;
+      const damp = ((ui.tab === 0 && dx > 0) || (ui.tab === 2 && dx < 0)) ? dx * 0.25 : dx;
+      $('track').style.transform = `translate3d(${base + damp}px, 0, 0)`;
+    }
+  }, { passive: true });
+
+  $('viewport').addEventListener('touchend', () => {
+    if (!swipe) return;
+    $('track').classList.remove('dragging');
+    if (swipe.locked === 'x') {
+      const thresh = Math.min(80, ($('viewport').clientWidth || 320) * 0.2);
+      if (swipe.dx < -thresh && ui.tab < 2) setTab(ui.tab + 1);
+      else if (swipe.dx > thresh && ui.tab > 0) setTab(ui.tab - 1);
+      else setTab(ui.tab);
+    }
+    swipe = null;
+  });
+
+  // Analytics Carousel Sync
+  function scrollCarousel(idx) {
+    const car = $('analyticsCarousel');
+    ui.carIdx = Math.max(0, Math.min(2, idx));
+    car.scrollTo({ left: ui.carIdx * car.clientWidth, behavior: 'smooth' });
+    updateCarouselDots();
+  }
+  function updateCarouselDots() {
+    document.querySelectorAll('.dot-btn').forEach(d => d.classList.toggle('active', Number(d.dataset.dot) === ui.carIdx));
+  }
+  $('analyticsCarousel').addEventListener('scroll', () => {
+    const car = $('analyticsCarousel');
+    const idx = Math.round(car.scrollLeft / Math.max(1, car.clientWidth));
+    if (idx !== ui.carIdx) { ui.carIdx = idx; updateCarouselDots(); }
+  }, { passive: true });
+
+  // ---------- Event Wiring ----------
+  document.querySelectorAll('.nav button').forEach(b => b.addEventListener('click', () => setTab(Number(b.dataset.tab))));
+  $('shieldBtn').addEventListener('click', openSafetyModal);
+  $('bulkBtn').addEventListener('click', openBulkModal);
+  $('waShareBtn').addEventListener('click', shareWhatsApp);
+  $('closeWeekBtn').addEventListener('click', openCloseWeekModal);
+
+  $('searchInput').addEventListener('input', updateSuggestions);
+  $('searchInput').addEventListener('keydown', (e) => {
+    if (!$('suggestBox').classList.contains('open') || !ui.suggestions.length) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); ui.suggestIdx = (ui.suggestIdx + 1) % ui.suggestions.length; renderSuggestItems(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); ui.suggestIdx = (ui.suggestIdx - 1 + ui.suggestions.length) % ui.suggestions.length; renderSuggestItems(); }
+    else if (e.key === 'Enter') { e.preventDefault(); pickSuggestion(ui.suggestIdx); }
+    else if (e.key === 'Escape') { $('suggestBox').classList.remove('open'); }
+  });
+  $('clearSearch').addEventListener('click', () => {
+    $('searchInput').value = '';
+    updateSuggestions();
+    $('searchInput').focus();
+  });
+  $('suggestBox').addEventListener('click', (e) => {
+    const item = e.target.closest('[data-pick-idx]');
+    if (item) pickSuggestion(Number(item.dataset.pickIdx));
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-row')) $('suggestBox').classList.remove('open');
+  });
+
+  $('modeGrouped').addEventListener('click', () => { ui.weekView = 'grouped'; renderWeek(); });
+  $('modeLog').addEventListener('click', () => { ui.weekView = 'log'; renderWeek(); });
+
+  $('weekList').addEventListener('click', (e) => {
+    const inc = e.target.closest('[data-inc]');
+    if (inc) {
+      const p = state.products.find(x => x.id === inc.dataset.inc);
+      if (p) addEntry(p, 1);
+      else {
+        const sample = state.currentWeek.find(x => x.productId === inc.dataset.inc);
+        if (sample) addEntry({ id: sample.productId, name: sample.name, categoryId: sample.categoryId, price: sample.unitPrice }, 1);
+      }
+      return;
+    }
+    const dec = e.target.closest('[data-dec]');
+    if (dec) return removeOneOfProduct(dec.dataset.dec, dec.dataset.name);
+    const del = e.target.closest('[data-del-entry]');
+    if (del) return removeEntryById(del.dataset.delEntry);
+  });
+
+  $('periodSeg').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-p]');
+    if (!btn) return;
+    ui.period = btn.dataset.p;
+    $('periodSeg').querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+    renderAnalytics();
+  });
+  $('includeActiveBtn').addEventListener('click', () => { ui.includeActive = !ui.includeActive; renderAnalytics(); });
+  $('topMetricSeg').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-m]');
+    if (!btn) return;
+    ui.topMetric = btn.dataset.m;
+    $('topMetricSeg').querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+    renderAnalytics();
+  });
+  $('weeksBody').addEventListener('click', (e) => {
+    const row = e.target.closest('[data-open-week]');
+    if (row) openWeekDetail(row.dataset.openWeek);
+  });
+  $('carPrev').addEventListener('click', () => scrollCarousel(ui.carIdx - 1));
+  $('carNext').addEventListener('click', () => scrollCarousel(ui.carIdx + 1));
+  document.querySelectorAll('.dot-btn').forEach(d => d.addEventListener('click', () => scrollCarousel(Number(d.dataset.dot))));
+
+  $('addProdBtn').addEventListener('click', () => openProductModal());
+  $('addCatBtn').addEventListener('click', () => openCategoryModal());
+  $('exportXlsxBtn').addEventListener('click', exportExcel);
+  $('importXlsxBtn').addEventListener('click', () => $('xlsxFileInput').click());
+  $('exportMenuJsonBtn').addEventListener('click', exportMenuJson);
+  $('syncMenuBtn').addEventListener('click', () => syncRemoteMenu(true));
+
+  $('menuFilterInput').addEventListener('input', (e) => { ui.menuQuery = e.target.value; renderMenu(); });
+  $('catChips').addEventListener('click', (e) => {
+    const chip = e.target.closest('[data-cat]');
+    if (!chip) return;
+    ui.menuCat = chip.dataset.cat;
+    renderMenu();
+  });
+  $('menuList').addEventListener('click', (e) => {
+    const ep = e.target.closest('[data-edit-prod]');
+    if (ep) return openProductModal(ep.dataset.editProd);
+    const ec = e.target.closest('[data-edit-cat]');
+    if (ec) return openCategoryModal(ec.dataset.editCat);
+  });
+
+  $('xlsxFileInput').addEventListener('change', (e) => {
+    const f = e.target.files[0];
+    if (f) importExcelFile(f);
+    e.target.value = '';
+  });
+
+  $('jsonBackupInput').addEventListener('change', async (e) => {
+    const f = e.target.files[0];
+    e.target.value = '';
+    if (!f) return;
+    try {
+      const parsed = JSON.parse(await f.text());
+      if (!Array.isArray(parsed.products) || !Array.isArray(parsed.currentWeek)) throw new Error();
+      state = { ...createFreshState(), ...parsed, updatedAt: Date.now() };
+      await saveState();
+      renderAll();
+      closeSheet();
+      toast('Yedek başarıyla geri yüklendi');
+    } catch {
+      toast('Geçersiz yedek dosyası');
+    }
+  });
+
+  // Flush safeguard on backgrounding
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') saveState(false);
+    else renderMondayPill();
+  });
+  window.addEventListener('pagehide', () => saveState(false));
+
+  // ---------- Boot ----------
+  async function init() {
+    await requestPersistence();
+    await loadBestState();
+    renderAll();
+
+    // Register Service Worker for offline PWA
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+    // Check GitHub menu.json in background
+    syncRemoteMenu(false);
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

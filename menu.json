@@ -1,0 +1,387 @@
+{
+  "version": "2026.11.20.1",
+  "updatedAt": "2026-11-20",
+  "currency": "₺",
+  "categories": [
+    {
+      "id": "tava",
+      "name": "Tava Çeşitleri",
+      "icon": "utensils",
+      "color": "amber"
+    },
+    {
+      "id": "tost",
+      "name": "Tost Çeşitleri",
+      "icon": "toast",
+      "color": "orange"
+    },
+    {
+      "id": "ekmek",
+      "name": "Ekmek Arası & Diğer",
+      "icon": "burger",
+      "color": "rose"
+    },
+    {
+      "id": "sicak",
+      "name": "Sıcak İçecekler",
+      "icon": "hot-cup",
+      "color": "emerald"
+    },
+    {
+      "id": "soguk",
+      "name": "Soğuk İçecekler",
+      "icon": "cold-cup",
+      "color": "sky"
+    },
+    {
+      "id": "atistirmalik",
+      "name": "Atıştırmalık",
+      "icon": "cookie",
+      "color": "violet"
+    }
+  ],
+  "products": [
+    {
+      "id": "tava_01",
+      "name": "Sade Menemen",
+      "price": 95,
+      "categoryId": "tava"
+    },
+    {
+      "id": "tava_02",
+      "name": "Kaşarlı Menemen",
+      "price": 115,
+      "categoryId": "tava"
+    },
+    {
+      "id": "tava_03",
+      "name": "Sucuklu Menemen",
+      "price": 115,
+      "categoryId": "tava"
+    },
+    {
+      "id": "tava_04",
+      "name": "Karışık Menemen",
+      "price": 130,
+      "categoryId": "tava"
+    },
+    {
+      "id": "tava_05",
+      "name": "Sade Yumurta",
+      "price": 60,
+      "categoryId": "tava"
+    },
+    {
+      "id": "tava_06",
+      "name": "Kaşarlı Yumurta",
+      "price": 75,
+      "categoryId": "tava"
+    },
+    {
+      "id": "tava_07",
+      "name": "Sucuklu Yumurta",
+      "price": 75,
+      "categoryId": "tava"
+    },
+    {
+      "id": "tava_08",
+      "name": "Karışık Yumurta",
+      "price": 90,
+      "categoryId": "tava"
+    },
+    {
+      "id": "tava_09",
+      "name": "Sebzeli Yumurta",
+      "price": 75,
+      "categoryId": "tava"
+    },
+    {
+      "id": "tava_10",
+      "name": "Sebzeli Kaşarlı Y.",
+      "price": 90,
+      "categoryId": "tava"
+    },
+    {
+      "id": "tava_11",
+      "name": "Sebzeli Sucuklu Y.",
+      "price": 90,
+      "categoryId": "tava"
+    },
+    {
+      "id": "tava_12",
+      "name": "Sebzeli Karışık Y.",
+      "price": 100,
+      "categoryId": "tava"
+    },
+    {
+      "id": "tava_13",
+      "name": "Kavurmalı Yumurta",
+      "price": 160,
+      "categoryId": "tava"
+    },
+    {
+      "id": "tost_01",
+      "name": "Sucuklu Tost",
+      "price": 70,
+      "categoryId": "tost"
+    },
+    {
+      "id": "tost_02",
+      "name": "Kaşarlı Tost",
+      "price": 75,
+      "categoryId": "tost"
+    },
+    {
+      "id": "tost_03",
+      "name": "Karışık Tost",
+      "price": 85,
+      "categoryId": "tost"
+    },
+    {
+      "id": "tost_04",
+      "name": "Sebzeli Kaşarlı Tost",
+      "price": 80,
+      "categoryId": "tost"
+    },
+    {
+      "id": "tost_05",
+      "name": "Sebzeli Sucuklu Tost",
+      "price": 80,
+      "categoryId": "tost"
+    },
+    {
+      "id": "tost_06",
+      "name": "Sebzeli Karışık Tost",
+      "price": 95,
+      "categoryId": "tost"
+    },
+    {
+      "id": "tost_07",
+      "name": "Çift Kaşarlı Tost",
+      "price": 100,
+      "categoryId": "tost"
+    },
+    {
+      "id": "tost_08",
+      "name": "Yumurtalı Kaşarlı Tost",
+      "price": 80,
+      "categoryId": "tost"
+    },
+    {
+      "id": "tost_09",
+      "name": "Yumurtalı Sucuklu Tost",
+      "price": 80,
+      "categoryId": "tost"
+    },
+    {
+      "id": "tost_10",
+      "name": "Yumurtalı Karışık Tost",
+      "price": 95,
+      "categoryId": "tost"
+    },
+    {
+      "id": "tost_11",
+      "name": "Kavurmalı Tost",
+      "price": 135,
+      "categoryId": "tost"
+    },
+    {
+      "id": "tost_12",
+      "name": "Kavurmalı Kaşarlı Tost",
+      "price": 160,
+      "categoryId": "tost"
+    },
+    {
+      "id": "ekmek_01",
+      "name": "Ekmek Arası Tavuk",
+      "price": 90,
+      "categoryId": "ekmek"
+    },
+    {
+      "id": "ekmek_02",
+      "name": "Ekmek Arası Nugget",
+      "price": 90,
+      "categoryId": "ekmek"
+    },
+    {
+      "id": "ekmek_03",
+      "name": "Ekmek Arası Tantuni",
+      "price": 90,
+      "categoryId": "ekmek"
+    },
+    {
+      "id": "ekmek_04",
+      "name": "Sucuk Ekmek",
+      "price": 90,
+      "categoryId": "ekmek"
+    },
+    {
+      "id": "ekmek_05",
+      "name": "Ekmek A. Ton Balığı",
+      "price": 120,
+      "categoryId": "ekmek"
+    },
+    {
+      "id": "ekmek_06",
+      "name": "Patsolu Tavuk / Nugget / Sucuk",
+      "price": 115,
+      "categoryId": "ekmek"
+    },
+    {
+      "id": "ekmek_07",
+      "name": "Köfte Ekmek",
+      "price": 160,
+      "categoryId": "ekmek"
+    },
+    {
+      "id": "ekmek_08",
+      "name": "Tabak Tavuk Patates",
+      "price": 180,
+      "categoryId": "ekmek"
+    },
+    {
+      "id": "ekmek_09",
+      "name": "Adana Dürüm",
+      "price": 160,
+      "categoryId": "ekmek"
+    },
+    {
+      "id": "ekmek_10",
+      "name": "Tavuk Dürüm",
+      "price": 110,
+      "categoryId": "ekmek"
+    },
+    {
+      "id": "ekmek_11",
+      "name": "Patsolu Tavuk Dürüm",
+      "price": 130,
+      "categoryId": "ekmek"
+    },
+    {
+      "id": "ekmek_12",
+      "name": "Tantuni Dürüm",
+      "price": 110,
+      "categoryId": "ekmek"
+    },
+    {
+      "id": "ekmek_13",
+      "name": "Soğuk Sandviç",
+      "price": 80,
+      "categoryId": "ekmek"
+    },
+    {
+      "id": "ekmek_14",
+      "name": "Patso",
+      "price": 70,
+      "categoryId": "ekmek"
+    },
+    {
+      "id": "ekmek_15",
+      "name": "Patates Tabağı",
+      "price": 70,
+      "categoryId": "ekmek"
+    },
+    {
+      "id": "ekmek_16",
+      "name": "Çiğ Köfte Dürüm",
+      "price": 60,
+      "categoryId": "ekmek"
+    },
+    {
+      "id": "ekmek_17",
+      "name": "Pizza",
+      "price": 200,
+      "categoryId": "ekmek"
+    },
+    {
+      "id": "sicak_01",
+      "name": "Büyük Çay",
+      "price": 15,
+      "categoryId": "sicak"
+    },
+    {
+      "id": "sicak_02",
+      "name": "Termos Çay (2L)",
+      "price": 150,
+      "categoryId": "sicak"
+    },
+    {
+      "id": "sicak_03",
+      "name": "Demleme Ihlamur",
+      "price": 15,
+      "categoryId": "sicak"
+    },
+    {
+      "id": "sicak_04",
+      "name": "Ihlamur",
+      "price": 12,
+      "categoryId": "sicak"
+    },
+    {
+      "id": "sicak_05",
+      "name": "Ballı Zenc. Ihlamur",
+      "price": 12,
+      "categoryId": "sicak"
+    },
+    {
+      "id": "sicak_06",
+      "name": "Kırmızı Meyveler",
+      "price": 12,
+      "categoryId": "sicak"
+    },
+    {
+      "id": "sicak_07",
+      "name": "Nane Limon",
+      "price": 12,
+      "categoryId": "sicak"
+    },
+    {
+      "id": "sicak_08",
+      "name": "Papatya, Adaçayı",
+      "price": 12,
+      "categoryId": "sicak"
+    },
+    {
+      "id": "sicak_09",
+      "name": "Nescafe",
+      "price": 18,
+      "categoryId": "sicak"
+    },
+    {
+      "id": "sicak_10",
+      "name": "Sütlü Köpüklü",
+      "price": 18,
+      "categoryId": "sicak"
+    },
+    {
+      "id": "sicak_11",
+      "name": "Mocha",
+      "price": 23,
+      "categoryId": "sicak"
+    },
+    {
+      "id": "sicak_12",
+      "name": "Latte",
+      "price": 23,
+      "categoryId": "sicak"
+    },
+    {
+      "id": "sicak_13",
+      "name": "Sıcak Çikolata",
+      "price": 28,
+      "categoryId": "sicak"
+    },
+    {
+      "id": "sicak_14",
+      "name": "Oralet (karadut, kivi, elma, muz)",
+      "price": 15,
+      "categoryId": "sicak"
+    },
+    {
+      "id": "sicak_15",
+      "name": "Tylolhot",
+      "price": 45,
+      "categoryId": "sicak"
+    }
+  ]
+}
